@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Bookme",
+    "slug": "Bookme",
+    "version": "1.0.4",
+    "orientation": "portrait",
+    "icon": "./assets/icons/0.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/icons/0.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/0.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.tesla254.Bookme"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b769ac1f-0cd5-474c-86f9-854f531228fe"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b769ac1f-0cd5-474c-86f9-854f531228fe"
+    }
+  },    
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-5482160285556109~6596192696"
+  }
+}
