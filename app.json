@@ -11,7 +11,8 @@
       "backgroundColor": "#fff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tesla254.Bookme"
     },
     "android": {
       "permissions": [

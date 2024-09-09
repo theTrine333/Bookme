@@ -9,12 +9,14 @@ import {
   TouchableOpacity,
   Modal,
   Dimensions,
+  Share,
 } from "react-native";
 import Pdf from "react-native-pdf";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { TextInput } from "react-native";
 export default function Reader({ navigation, route }) {
   const book_url = route.params.bookUrl;
+  const book_Title = route.params.bookTitle;
   const onlineSource = { uri: `${book_url}`, cache: true };
   const [pdfSource, setPdfSource] = useState(onlineSource);
   const pdfRef = useRef();
@@ -96,6 +98,13 @@ export default function Reader({ navigation, route }) {
                 styles.modalSubView,
                 { alignSelf: "center", padding: 10 },
               ]}
+              onPress={async () => {
+                await Share.share({
+                  message: `Check out this book ${book_Title}`,
+                  title: "Bookme",
+                  url: `${book_url}`,
+                });
+              }}
             >
               <Text style={styles.modalText}>Share</Text>
               <AntDesign name="sharealt" size={25} style={{ marginTop: 2 }} />

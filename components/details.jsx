@@ -186,6 +186,7 @@ const Details = ({ navigation, route }) => {
           Fetch.extractLink(download_server).then((link) => {
             navigation.navigate("Reader", {
               bookUrl: link,
+              bookTitle: `${route.params.title}`,
             });
           });
         }}
