@@ -1,27 +1,34 @@
-import { StyleSheet,Text, View,Image, Pressable, Button, TouchableOpacity } from 'react-native'
-import {React,useState} from 'react'
-import { Divider } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native'
-import details from './details'
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Pressable,
+  Button,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { React, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import details from "./details";
 import { useSQLiteContext } from "expo-sqlite/next";
 const Card = ({
-    bookUrl,
-    Title,
-    Description,
-    bookPoster,
-    authors,
-    lang,
-    size,
-    Ext,
-    download_server,
+  bookUrl,
+  Title,
+  Description,
+  bookPoster,
+  authors,
+  lang,
+  size,
+  Ext,
+  download_server,
 }) => {
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, isLoading] = useState(false);
+  const navigation = useNavigation();
+  const db = useSQLiteContext();
 
-const [imageUrl,setImageUrl] = useState("")
-const [loading,isLoading] = useState(false)
-const navigation = useNavigation();
-const db = useSQLiteContext();
-
-async function insertTransaction() {
+  async function insertTransaction() {
     db.withTransactionAsync(async () => {
       await db.runAsync(
         `
@@ -36,60 +43,87 @@ async function insertTransaction() {
           size,
           bookUrl,
           download_server,
-          Ext
+          Ext,
         ]
       );
     });
   }
 
-return (
-    <TouchableOpacity onPress={() => {
-        insertTransaction()
-        navigation.navigate("Details",{
-            Poster:(bookPoster || "https://libgen.li/img/blank.png"),
-            title:Title,
-            authors:authors,
-            lang:lang,
-            size:size,
-            Ext:Ext,
-            description:Description,
-            bookurl:bookUrl,
-            Server:download_server
-        })
-    }}>
-        <View style={styles.card}>
-            <Image 
-                source={{uri : (bookPoster || "https://libgen.li/img/blank.png")}} 
-                style={{
-                    height:100,width:100,borderRadius:8,resizeMode:'contain'
-                }}
-            />
-            <View style={styles.detailsContainer}>
-                <Text style={styles.heading} numberOfLines={2}>{Title}</Text>
-                <Text style={styles.subHeading} numberOfLines={3}>Author(s) : {authors}</Text>
-                <Text style={styles.subHeading}>Lang : {lang} | Size : {size} | {Ext} | </Text>
-            </View>
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        insertTransaction();
+        navigation.navigate("Details", {
+          Poster: bookPoster || "https://libgen.li/img/blank.png",
+          title: Title,
+          authors: authors,
+          lang: lang,
+          size: size,
+          Ext: Ext,
+          description: Description,
+          bookurl: bookUrl,
+          Server: download_server,
+        });
+      }}
+    >
+      <View style={styles.card}>
+        <Image
+          source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
+          style={{
+            height: 100,
+            width: 100,
+            borderRadius: 8,
+            resizeMode: "contain",
+          }}
+        />
+        <View style={styles.detailsContainer}>
+          <Text style={styles.heading} numberOfLines={2}>
+            {Title}
+          </Text>
+          {authors === "" ? (
+            <></>
+          ) : (
+            <Text style={styles.subHeading} numberOfLines={3}>
+              Author(s) : {authors}
+            </Text>
+          )}
+
+          <Text style={styles.subHeading}>
+            Lang : {lang} | Size : {size} | {Ext} |{" "}
+          </Text>
         </View>
-        <Divider style={{marginTop:5,}}/>
+      </View>
+      <View
+        style={{
+          marginTop: 5,
+          width: "98%",
+          height: height * 0.001,
+          borderWidth: 0.3,
+          borderColor: "lightgrey",
+          alignSelf: "center",
+        }}
+      />
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 export default Card;
-
+const { height, width } = Dimensions.get("screen");
 const styles = StyleSheet.create({
-    card:{
-        flex: 1,
-        flexDirection:'row',
-    },heading:{
-        fontWeight:'bold',
-    },subHeading:{
-        fontSize:12,
-    },
-    detailsContainer:{
-        gap:5,
-        alignContent:"flex-start",
-        justifyContent:"flex-start",
-        width:"70%"
-    }
-})
+  card: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  heading: {
+    fontWeight: "bold",
+  },
+  subHeading: {
+    fontSize: 12,
+  },
+  detailsContainer: {
+    gap: 5,
+    alignContent: "flex-start",
+    justifyContent: "flex-start",
+    width: "70%",
+  },
+});

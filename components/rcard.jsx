@@ -14,6 +14,7 @@ const RCard = ({
   size,
   Ext,
   download_server,
+  getData,
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, isLoading] = useState(false);
@@ -73,6 +74,7 @@ const RCard = ({
         }}
         onPress={() => {
           deleteRec();
+          getData();
         }}
       >
         <AntDesign name="closecircleo" size={20} color="red" />

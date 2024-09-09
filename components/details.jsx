@@ -16,7 +16,8 @@ import * as Fetch from "../api/api";
 import { InterstitialAd, AdEventType } from "react-native-google-mobile-ads";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { useSQLiteContext } from "expo-sqlite/next";
-
+import Octicons from "@expo/vector-icons/Octicons";
+import Feather from "@expo/vector-icons/Feather";
 const adUnitId = "ca-app-pub-5482160285556109/3851781686";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -42,7 +43,7 @@ const Details = ({ navigation, route }) => {
     db.withTransactionAsync(async () => {
       await db.runAsync(
         `
-            INSERT INTO Dwns (Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?);
+            INSERT INTO Downloads (Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?);
           `,
         [
           route.params.title,
@@ -138,51 +139,7 @@ const Details = ({ navigation, route }) => {
                 size={BannerAdSize.BANNER}
                 unitId="ca-app-pub-5482160285556109/4302126257"
               />
-              <View style={styles.btns}>
-                <TouchableOpacity
-                  style={styles.serverButton}
-                  onPress={() => {
-                    insertTransaction();
-                    adLoaded ? (
-                      () => {
-                        interstitial.show();
-                        console.log("loaded");
-                      }
-                    ) : (
-                      <></>
-                    );
-                    setdownLoading(true);
-                    Fetch.extractLink(download_server).then((link) => {
-                      setStarted(true);
-                      Linking.openURL(`${link}`);
-                      setdownLoading(false);
-                    });
-                  }}
-                >
-                  <Text style={{ textAlign: "center" }}>Download</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.readButton}
-                  onPress={() => {
-                    adLoaded ? (
-                      () => {
-                        interstitial.show();
-                        console.log("loaded");
-                      }
-                    ) : (
-                      <></>
-                    );
-                    Fetch.extractLink(download_server).then((link) => {
-                      navigation.navigate("Reader", {
-                        bookUrl: link,
-                      });
-                    });
-                  }}
-                >
-                  <Text style={{ textAlign: "center" }}>Read online</Text>
-                </TouchableOpacity>
-              </View>
+              <View style={styles.btns}></View>
               <View style={{ flex: 1, alignSelf: "flex-start" }}>
                 <BannerAd
                   ref={bannerRef}
@@ -194,6 +151,48 @@ const Details = ({ navigation, route }) => {
           )}
         </View>
       </ScrollView>
+      <TouchableOpacity
+        style={styles.serverButton}
+        onPress={() => {
+          insertTransaction();
+          adLoaded ? (
+            () => {
+              interstitial.show();
+            }
+          ) : (
+            <></>
+          );
+          setdownLoading(true);
+          Fetch.extractLink(download_server).then((link) => {
+            setStarted(true);
+            Linking.openURL(`${link}`);
+            setdownLoading(false);
+          });
+        }}
+      >
+        <Octicons name="download" size={20} color={"white"} />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.readButton}
+        onPress={() => {
+          adLoaded ? (
+            () => {
+              interstitial.show();
+            }
+          ) : (
+            <></>
+          );
+          Fetch.extractLink(download_server).then((link) => {
+            navigation.navigate("Reader", {
+              bookUrl: link,
+            });
+          });
+        }}
+      >
+        <Feather name="book-open" size={20} color={"white"} />
+        <Text style={styles.btnText}>READ ONLINE</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -207,6 +206,12 @@ const styles = StyleSheet.create({
     alignContent: "flex-start",
     paddingLeft: 5,
     paddingTop: 45,
+  },
+  btnText: {
+    fontSize: 10,
+    alignSelf: "center",
+    paddingLeft: 5,
+    color: "white",
   },
   Divider: {
     marginTop: 5,
@@ -264,21 +269,25 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   serverButton: {
-    paddingTop: 15,
-    paddingBottom: 15,
-    paddingLeft: 40,
-    paddingRight: 40,
+    flexDirection: "row",
+    position: "absolute",
+    right: 40,
+    bottom: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     backgroundColor: "rgba(255,130,0,205)",
-    borderRadius: 10,
+    borderRadius: 100,
   },
   readButton: {
-    paddingTop: 15,
-    paddingBottom: 15,
-    paddingLeft: 40,
-    paddingRight: 40,
-    borderRadius: 10,
-    borderColor: "rgba(255,130,0,205)",
-    borderWidth: 1,
+    flexDirection: "row",
+    position: "absolute",
+    Left: 20,
+    marginLeft: 40,
+    bottom: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "rgba(255,130,0,205)",
+    borderRadius: 100,
   },
   retryButton: {
     paddingTop: 10,

@@ -40,7 +40,7 @@ export default function Reader({ navigation, route }) {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "center",
+
                   width: 80,
                   backgroundColor: "lightgrey",
                 }}
@@ -51,6 +51,13 @@ export default function Reader({ navigation, route }) {
                   style={{
                     textAlign: "center",
                     fontSize: 12,
+                    borderWidth: 0.3,
+                    height: height * 0.025,
+                    marginLeft: 3,
+                    borderRadius: 2,
+                    marginVertical: 5,
+                    width: "50%",
+                    borderColor: "grey",
                   }}
                   keyboardType="numeric"
                   value={pageText}
@@ -163,7 +170,7 @@ export default function Reader({ navigation, route }) {
         <AntDesign name="menufold" size={15} color="grey" />
       </TouchableOpacity>
 
-      <StatusBar style="dark" hidden={true} />
+      <StatusBar style="dark" />
     </SafeAreaView>
   );
 }

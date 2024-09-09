@@ -83,6 +83,7 @@ const Recent = () => {
                 Ext={item.Extension}
                 bookUrl={item.Url}
                 download_server={item.Link}
+                getData={getData}
               />
             )}
             keyExtractor={(item, index) => index.toString()}

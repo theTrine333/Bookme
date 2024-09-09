@@ -64,7 +64,6 @@ export default function Home() {
                 })
                 .catch((error) => {
                   isError(true);
-                  console.log(error);
                 });
             }
           }}
@@ -154,15 +153,6 @@ export default function Home() {
                   unitId={"ca-app-pub-5482160285556109/4302126257"}
                   size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
                 />
-                // <BannerAd
-                //     size={BannerAdSize.FULL_BANNER}
-                //     unitId=""
-                //     requestOptions={{
-                //         requestNonPersonalizedAdsOnly: true,
-                //     }}
-                //     onAdLoaded={() => {}}
-                //     onAdFailedToLoad={() => {}}
-                // />
               }
             />
           </>
