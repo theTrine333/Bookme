@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "backgroundColor": "#fff"
@@ -39,7 +40,8 @@
     },
     "updates": {
       "url": "https://u.expo.dev/b769ac1f-0cd5-474c-86f9-854f531228fe"
-    }
+    },
+    "plugins": ["expo-asset", "expo-router"]
   },
   "react-native-google-mobile-ads": {
     "android_app_id": "ca-app-pub-5482160285556109~6596192696"

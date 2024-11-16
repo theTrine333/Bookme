@@ -22,7 +22,7 @@ import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";
 import Home from "./screens/Home";
 import Reader from "./components/reader";
-import { SQLiteProvider } from "expo-sqlite/next";
+import { SQLiteProvider } from "expo-sqlite";
 import * as SQLite from "expo-sqlite";
 
 const loadDatabase = async () => {
@@ -33,13 +33,12 @@ const loadDatabase = async () => {
   const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
 
   const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
-  if (!fileInfo.exists) {
-    await FileSystem.makeDirectoryAsync(
-      `${FileSystem.documentDirectory}SQLite`,
-      { intermediates: true }
-    );
-    await FileSystem.downloadAsync(dbUri, dbFilePath);
-  }
+  // if (!fileInfo.exists) {
+  await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}SQLite`, {
+    intermediates: true,
+  });
+  await FileSystem.downloadAsync(dbUri, dbFilePath);
+  // }
 };
 
 const loadInterstitial = async () => {
@@ -61,16 +60,16 @@ export default function App() {
   const adUnitId = TestIds.APP_OPEN;
   const db = SQLite.openDatabaseSync("bookme.db");
 
-  useEffect(() => {
-    db.execAsync(
-      `CREATE TABLE IF NOT EXISTS "Downloads" ("ID" INTEGER PRIMARY KEY AUTOINCREMENT,"Title"	TEXT UNIQUE,"Authors"	TEXT,	"Description"	TEXT,"Poster"	TEXT,	"Language"	TEXT,	"Size"	TEXT,	"Url"	TEXT,	"Link"	TEXT,	"Extension"	TEXT)`,
-      []
-    );
-    db.execAsync(
-      `CREATE TABLE IF NOT EXISTS "Recent" ("ID" INTEGER PRIMARY KEY AUTOINCREMENT,"Title"	TEXT UNIQUE,	"Authors"	TEXT,	"Description"	TEXT,	"Poster"	TEXT,	"Language"	TEXT,	"Size"	TEXT,	"Url"	TEXT,	"Link"	TEXT,	"Extension"	TEXT)`,
-      []
-    );
-  }, []);
+  // useEffect(() => {
+  //   db.execAsync(
+  //     `CREATE TABLE IF NOT EXISTS "Downloads" ("ID" INTEGER PRIMARY KEY AUTOINCREMENT,"Title"	TEXT UNIQUE,"Authors"	TEXT,	"Description"	TEXT,"Poster"	TEXT,	"Language"	TEXT,	"Size"	TEXT,	"Url"	TEXT,	"Link"	TEXT,	"Extension"	TEXT)`,
+  //     []
+  //   );
+  //   db.execAsync(
+  //     `CREATE TABLE IF NOT EXISTS "Recent" ("ID" INTEGER PRIMARY KEY AUTOINCREMENT,"Title"	TEXT UNIQUE,	"Authors"	TEXT,	"Description"	TEXT,	"Poster"	TEXT,	"Language"	TEXT,	"Size"	TEXT,	"Url"	TEXT,	"Link"	TEXT,	"Extension"	TEXT)`,
+  //     []
+  //   );
+  // }, []);
   // npm i react-lazy-load-image-component
 
   return (
@@ -91,6 +90,7 @@ export default function App() {
       >
         <SQLiteProvider databaseName="bookme.db" useSuspense>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Startup" component={Startup} />
             <Stack.Screen name="ScreenTabs" component={Navigation} />
             <Stack.Screen name="Details" component={Details} />

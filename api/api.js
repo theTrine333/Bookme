@@ -1,13 +1,13 @@
 import axios from "axios";
-import * as cheerio from "cheerio";
+import * as cheerio from "react-native-cheerio";
 
 const uniqueBooks = new Set();
-export async function getSearch(search, setLoading, isError) {
+export async function getSearch(search) {
   try {
     search = search.replace(/ /g, "%20");
     const main_url = `https://libgen.li/index.php?req=${search}&columns%5B%5D=t&columns%5B%5D=a&columns%5B%5D=s&columns%5B%5D=y&columns%5B%5D=p&columns%5B%5D=i&objects%5B%5D=f&objects%5B%5D=e&objects%5B%5D=s&objects%5B%5D=a&objects%5B%5D=p&objects%5B%5D=w&topics%5B%5D=l&topics%5B%5D=c&topics%5B%5D=f&topics%5B%5D=a&topics%5B%5D=m&topics%5B%5D=r&topics%5B%5D=s&res=50&covers=on&filesuns=sort`;
     const response = await axios.get(main_url);
-    console.log(await response.statusText);
+    console.log("Status", response.status);
     const books = [];
 
     const $ = cheerio.load(response.data);
@@ -52,9 +52,7 @@ export async function getSearch(search, setLoading, isError) {
     return books;
   } catch (error) {
     console.log(error);
-    setLoading(false);
-    isError(true);
-    return [];
+    return error;
   }
 }
 

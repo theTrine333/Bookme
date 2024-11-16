@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Image, FlatList } from "react-native";
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import RCard from "../components/rcard";
 import { useNavigation } from "@react-navigation/native";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";

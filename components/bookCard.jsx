@@ -11,7 +11,7 @@ import {
 import { React, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import details from "./details";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 const Card = ({
   bookUrl,
   Title,
@@ -77,7 +77,7 @@ const Card = ({
           }}
         />
         <View style={styles.detailsContainer}>
-          <Text style={styles.heading} numberOfLines={2}>
+          <Text style={styles.heading} numberOfLines={3}>
             {Title}
           </Text>
           {authors === "" ? (
@@ -89,7 +89,7 @@ const Card = ({
           )}
 
           <Text style={styles.subHeading}>
-            Lang : {lang} | Size : {size} | {Ext} |{" "}
+            Language : {lang} | Size : {size} | {Ext} |{" "}
           </Text>
         </View>
       </View>
@@ -108,7 +108,7 @@ const Card = ({
 };
 
 export default Card;
-const { height, width } = Dimensions.get("screen");
+export const { height, width } = Dimensions.get("screen");
 const styles = StyleSheet.create({
   card: {
     flex: 1,
@@ -124,6 +124,6 @@ const styles = StyleSheet.create({
     gap: 5,
     alignContent: "flex-start",
     justifyContent: "flex-start",
-    width: "70%",
+    width: width * 0.68,
   },
 });

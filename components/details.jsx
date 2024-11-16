@@ -15,7 +15,7 @@ import { React, useState, useEffect, useRef } from "react";
 import * as Fetch from "../api/api";
 import { InterstitialAd, AdEventType } from "react-native-google-mobile-ads";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import Octicons from "@expo/vector-icons/Octicons";
 import Feather from "@expo/vector-icons/Feather";
 const adUnitId = "ca-app-pub-5482160285556109/3851781686";

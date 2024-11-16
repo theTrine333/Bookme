@@ -1,8 +1,6 @@
 import {
   FlatList,
   Image,
-  Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,16 +8,12 @@ import {
   View,
 } from "react-native";
 import React, { useRef, useState } from "react";
-import Card from "../components/bookCard";
+import Card, { height, width } from "../components/bookCard";
 import { ActivityIndicator } from "react-native";
 import { getSearch } from "../api/api";
-import {
-  BannerAd,
-  BannerAdSize,
-  TestIds,
-  useForeground,
-} from "react-native-google-mobile-ads";
-
+import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import { StatusBar } from "expo-status-bar";
+import * as IconsOutline from "react-native-heroicons/outline";
 export default function Home() {
   const [isLoading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -29,52 +23,77 @@ export default function Home() {
 
   const bannerRef = useRef(null);
 
-  useForeground(() => {
-    Platform.OS === "ios" && bannerRef.current?.load();
-  });
-
+  const fetchBook = async () => {
+    setLoading(true);
+    getSearch(searchText)
+      .then((books) => {
+        setLoading(false);
+        console.log("Books", books.length);
+        if (books.length === 0) {
+          isError(true);
+        } else {
+          isError(false);
+          setResults(books);
+        }
+        // Continue with the execution after processing books
+      })
+      .catch((error) => {
+        isError(true);
+      });
+  };
   return (
     <View style={styles.container}>
-      <View style={styles.searchbox}>
-        <TextInput
-          placeholder="Search for a book"
-          style={styles.textInput}
-          onChangeText={(text) => {
-            setSearchText(text);
-          }}
-          onSubmitEditing={() => {
-            setLoading(true);
-            setFetched(true);
-            {
-              setResults(new Array(0));
-              getSearch(searchText, setLoading, isError)
-                .then((books) => {
-                  // Process the books here
-                  if (books.length == 0) {
-                    isError(true);
-                  } else {
-                    books.forEach((book) => {
-                      results.push(book);
-                    });
-                    // setResults(books)
-                    setLoading(false);
-                    setResults((prevResults) => [...prevResults, ...books]);
-                  }
-                  // Continue with the execution after processing books
-                })
-                .catch((error) => {
-                  isError(true);
-                });
-            }
-          }}
-        />
+      <View style={styles.headerView}>
+        <View style={styles.rowView}>
+          <View style={{ flexDirection: "row" }}>
+            <Image
+              source={require("../assets/icons/0.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
+            <View>
+              <Text style={{ fontWeight: "bold" }}>Bookme</Text>
+              <Text style={{ fontSize: 12 }}>All in the library</Text>
+            </View>
+          </View>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              gap: 5,
+              justifyContent: "center",
+            }}
+          >
+            <TouchableOpacity>
+              <IconsOutline.FolderArrowDownIcon size={28} color={"black"} />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <IconsOutline.CogIcon size={31} color={"black"} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.searchbox}>
+          <TextInput
+            placeholder="Search for a book"
+            style={styles.textInput}
+            onChangeText={(text) => {
+              setSearchText(text);
+            }}
+            onSubmitEditing={fetchBook}
+          />
+        </View>
       </View>
-
-      <View style={styles.resultView}>
+      <View>
         {isLoading ? (
-          <ActivityIndicator size="large" color={"rgba(255,140,0,255)"} />
+          <ActivityIndicator size="large" color={"rgb(255,140,0)"} />
         ) : error ? (
-          <View style={{ alignContent: "center", justifyContent: "center" }}>
+          <View
+            style={{
+              alignContent: "center",
+              justifyContent: "center",
+              marginTop: 10,
+            }}
+          >
             <Text style={{ textAlign: "center", color: "#E3002A" }}>
               Something went wrong
             </Text>
@@ -110,10 +129,6 @@ export default function Home() {
             >
               <Text style={{ textAlign: "center" }}>Retry</Text>
             </TouchableOpacity>
-            <BannerAd
-              size={BannerAdSize.FULL_BANNER}
-              unitId="ca-app-pub-5482160285556109/4302126257"
-            />
           </View>
         ) : results.length == 0 && isFetched ? (
           <View>
@@ -121,13 +136,22 @@ export default function Home() {
               No results found
             </Text>
             <BannerAd
-              ref={bannerRef}
               unitId={"ca-app-pub-5482160285556109/4302126257"}
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
             />
           </View>
         ) : (
-          <>
+          <View
+            style={{
+              alignSelf: "center",
+              maxHeight: height * 0.723,
+              minWidth: width * 0.97,
+              backgroundColor: '"rgb(220,220,220)',
+              borderRadius: 12,
+              paddingTop: 10,
+              marginTop: 10,
+            }}
+          >
             <FlatList
               data={results}
               renderItem={({ item }) => (
@@ -144,20 +168,20 @@ export default function Home() {
                 />
               )}
               keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={{ gap: 10 }}
+              contentContainerStyle={{ gap: 10, paddingBottom: 40 }}
               vertical
               showsVerticalScrollIndicator={false}
-              ListFooterComponent={
-                <BannerAd
-                  ref={bannerRef}
-                  unitId={"ca-app-pub-5482160285556109/4302126257"}
-                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                />
-              }
             />
-          </>
+          </View>
         )}
       </View>
+      <View style={{ position: "absolute", bottom: 1 }}>
+        <BannerAd
+          unitId={"ca-app-pub-5482160285556109/4302126257"}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        />
+      </View>
+      <StatusBar style="auto" />
     </View>
   );
 }
@@ -165,9 +189,13 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  headerView: {
+    backgroundColor: "grey",
     paddingTop: 45,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    paddingBottom: 20,
   },
   searchbox: {
     justifyContent: "center",
@@ -178,28 +206,30 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   textInput: {
-    width: "90%", //Was 80%
+    width: width * 0.96, //Was 80%
     borderRadius: 8,
-    paddingLeft: 20,
+    paddingLeft: 10,
     backgroundColor: "rgb(180,180,180)",
   },
-  resultView: {
-    // backgroundColor:'rgba(220,220,220)',
-    display: "flex",
-    width: "100%",
-    height: "95%",
-    paddingRight: 20,
-    paddingLeft: 10,
-    flexDirection: "column",
-    paddingTop: 10,
+  rowView: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+  },
+  image: {
+    height: 40,
+    width: 40,
   },
   retryButton: {
     paddingTop: 10,
-    marginLeft: 10,
+    alignSelf: "center",
+    width: width * 0.8,
+    height: height * 0.05,
     paddingBottom: 10,
     paddingLeft: 40,
+    marginTop: 5,
     paddingRight: 40,
-    backgroundColor: "rgb(255,130,0,1)",
+    backgroundColor: "rgb(255,130,0)",
     borderRadius: 10,
   },
 });

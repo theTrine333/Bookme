@@ -26,7 +26,7 @@ const Startup = ({ navigation }) => {
       <TouchableOpacity
         style={style.button}
         onPress={() => {
-          navigation.navigate("ScreenTabs");
+          navigation.navigate("Home");
         }}
       >
         <Text style={{ color: "white", fontWeight: "700" }}>Get Started</Text>
