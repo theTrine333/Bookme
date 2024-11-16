@@ -19,7 +19,7 @@ const Downloads = () => {
       "SELECT * FROM Downloads ORDER BY ID DESC;"
     );
     setResults(result);
-    console.log("Data : \n" + JSON.stringify(result, undefined, 2));
+    // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
 
   useEffect(() => {

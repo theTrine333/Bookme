@@ -135,10 +135,6 @@ const Details = ({ navigation, route }) => {
             </>
           ) : (
             <>
-              <BannerAd
-                size={BannerAdSize.BANNER}
-                unitId="ca-app-pub-5482160285556109/4302126257"
-              />
               <View style={styles.btns}></View>
               <View style={{ flex: 1, alignSelf: "flex-start" }}>
                 <BannerAd
