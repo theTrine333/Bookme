@@ -5,6 +5,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import DCard from "../components/dcard";
 import { useNavigation } from "@react-navigation/native";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import { height, width } from "../components/bookCard";
 
 const Downloads = () => {
   const [results, setResults] = useState({});
@@ -18,7 +19,7 @@ const Downloads = () => {
       "SELECT * FROM Downloads ORDER BY ID DESC;"
     );
     setResults(result);
-    /* console.log("Data : \n" + JSON.stringify(result, undefined, 2)); */
+    console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
 
   useEffect(() => {
@@ -32,7 +33,17 @@ const Downloads = () => {
   }, [navigation]);
 
   return (
-    <>
+    <View style={styles.container}>
+      <View style={styles.headerView}>
+        <Image
+          source={require("../assets/icons/0.png")}
+          style={styles.image}
+          resizeMode="contain"
+        />
+        <Text style={{ textAlign: "center", fontWeight: "bold", fontSize: 28 }}>
+          Downloads
+        </Text>
+      </View>
       {isloading ? (
         <ActivityIndicator size="large" color={"rgba(255,140,0,255)"} />
       ) : error ? (
@@ -69,7 +80,17 @@ const Downloads = () => {
           </Text>
         </View>
       ) : (
-        <View style={styles.container}>
+        <View
+          style={{
+            alignSelf: "center",
+            maxHeight: height * 0.723,
+            minWidth: width * 0.97,
+            backgroundColor: '"rgb(220,220,220)',
+            borderRadius: 12,
+            paddingTop: 10,
+            marginTop: 10,
+          }}
+        >
           <FlatList
             data={results}
             renderItem={({ item }) => (
@@ -89,26 +110,65 @@ const Downloads = () => {
             contentContainerStyle={{ gap: 10 }}
             vertical
             showsVerticalScrollIndicator={false}
-            ListFooterComponent={
-              <BannerAd
-                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                unitId="ca-app-pub-5482160285556109/4302126257"
-              />
-            }
           />
         </View>
       )}
-    </>
+      <View style={{ position: "absolute", bottom: 1 }}>
+        <BannerAd
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          unitId="ca-app-pub-5482160285556109/4302126257"
+        />
+      </View>
+    </View>
   );
 };
 
 export default Downloads;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerView: {
+    backgroundColor: "grey",
     alignItems: "center",
+    paddingTop: 60,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    paddingBottom: 20,
+  },
+  searchbox: {
     justifyContent: "center",
-    paddingTop: 45,
+    flexDirection: "row",
+    width: "100%",
+    marginTop: 10,
+    height: 40,
+    gap: 10,
+  },
+  textInput: {
+    width: width * 0.96, //Was 80%
+    borderRadius: 8,
+    paddingLeft: 10,
+    backgroundColor: "rgb(180,180,180)",
+  },
+  rowView: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+  },
+  image: {
+    height: 80,
+    width: 80,
+  },
+  retryButton: {
+    paddingTop: 10,
+    alignSelf: "center",
+    width: width * 0.8,
+    height: height * 0.05,
+    paddingBottom: 10,
+    paddingLeft: 40,
+    marginTop: 5,
+    paddingRight: 40,
+    backgroundColor: "rgb(255,130,0)",
+    borderRadius: 10,
   },
 });

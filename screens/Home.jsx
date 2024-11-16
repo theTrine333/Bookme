@@ -14,28 +14,25 @@ import { getSearch } from "../api/api";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { StatusBar } from "expo-status-bar";
 import * as IconsOutline from "react-native-heroicons/outline";
-export default function Home() {
+export default function Home({ navigation }) {
   const [isLoading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [error, isError] = useState(false);
   const [isFetched, setFetched] = useState(false);
   const [results, setResults] = useState([]);
 
-  const bannerRef = useRef(null);
-
   const fetchBook = async () => {
     setLoading(true);
     getSearch(searchText)
       .then((books) => {
         setLoading(false);
-        console.log("Books", books.length);
+        // console.log("Books", books.length);
         if (books.length === 0) {
           isError(true);
         } else {
           isError(false);
           setResults(books);
         }
-        // Continue with the execution after processing books
       })
       .catch((error) => {
         isError(true);
@@ -64,12 +61,16 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Downloads");
+              }}
+            >
               <IconsOutline.FolderArrowDownIcon size={28} color={"black"} />
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <IconsOutline.CogIcon size={31} color={"black"} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
         <View style={styles.searchbox}>
@@ -85,7 +86,11 @@ export default function Home() {
       </View>
       <View>
         {isLoading ? (
-          <ActivityIndicator size="large" color={"rgb(255,140,0)"} />
+          <ActivityIndicator
+            size={25}
+            color={"rgb(255,140,0)"}
+            style={{ marginTop: 10 }}
+          />
         ) : error ? (
           <View
             style={{
@@ -100,33 +105,7 @@ export default function Home() {
             <Text style={{ textAlign: "center" }}>
               Can't fetch data at the moment
             </Text>
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={() => {
-                setLoading(true);
-                setFetched(true);
-
-                setResults(new Array(0));
-                getSearch(searchText, setLoading, isError)
-                  .then((books) => {
-                    // Process the books here
-                    if (books.length == 0) {
-                      isError(true);
-                    } else {
-                      books.forEach((book) => {
-                        results.push(book);
-                      });
-                      // setResults(books)
-                      setLoading(false);
-                      setResults((prevResults) => [...prevResults, ...books]);
-                    }
-                    // Continue with the execution after processing books
-                  })
-                  .catch((error) => {
-                    isError(true);
-                  });
-              }}
-            >
+            <TouchableOpacity style={styles.retryButton} onPress={fetchBook}>
               <Text style={{ textAlign: "center" }}>Retry</Text>
             </TouchableOpacity>
           </View>

@@ -3,6 +3,7 @@ import { React, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSQLiteContext } from "expo-sqlite";
+import { height, width } from "./bookCard";
 
 const DCard = ({
   bookUrl,
@@ -52,30 +53,32 @@ const DCard = ({
           }}
         />
         <View style={styles.detailsContainer}>
-          <Text style={styles.heading} numberOfLines={2}>
+          <Text style={styles.heading} numberOfLines={3}>
             {Title}
           </Text>
-          <Text style={styles.subHeading} numberOfLines={3}>
-            Author(s) : {authors}
-          </Text>
+          {authors === "" ? (
+            <></>
+          ) : (
+            <Text style={styles.subHeading} numberOfLines={3}>
+              Author(s) : {authors}
+            </Text>
+          )}
+
           <Text style={styles.subHeading}>
-            Lang : {lang} | Size : {size} | {Ext} |{" "}
+            Language : {lang} | Size : {size} | {Ext} |{" "}
           </Text>
         </View>
       </View>
-      <TouchableOpacity
+      <View
         style={{
-          position: "absolute",
-          right: 10,
-          paddingTop: 10,
-          paddingRight: 10,
+          marginTop: 5,
+          width: "98%",
+          height: height * 0.001,
+          borderWidth: 0.3,
+          borderColor: "lightgrey",
+          alignSelf: "center",
         }}
-        onPress={() => {
-          deleteDown();
-        }}
-      >
-        <AntDesign name="closecircleo" size={20} color="red" />
-      </TouchableOpacity>
+      />
     </TouchableOpacity>
   );
 };
@@ -86,11 +89,6 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     flexDirection: "row",
-    borderRadius: 12,
-    padding: 5,
-    borderWidth: 0.5,
-    width: "95%",
-    marginLeft: 6,
   },
   heading: {
     fontWeight: "bold",
@@ -102,6 +100,6 @@ const styles = StyleSheet.create({
     gap: 5,
     alignContent: "flex-start",
     justifyContent: "flex-start",
-    width: "65%",
+    width: width * 0.68,
   },
 });

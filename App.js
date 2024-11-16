@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Navigation from "./Navigation";
 import Startup from "./screens/Startup";
 import Details from "./components/details";
 import { StatusBar } from "expo-status-bar";
@@ -24,6 +23,7 @@ import Home from "./screens/Home";
 import Reader from "./components/reader";
 import { SQLiteProvider } from "expo-sqlite";
 import * as SQLite from "expo-sqlite";
+import Downloads from "./screens/Downloads";
 
 const loadDatabase = async () => {
   const dbName = "bookme.db";
@@ -91,10 +91,11 @@ export default function App() {
         <SQLiteProvider databaseName="bookme.db" useSuspense>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="Startup" component={Startup} />
-            <Stack.Screen name="ScreenTabs" component={Navigation} />
+            {/* <Stack.Screen name="Startup" component={Startup} /> */}
+            {/* <Stack.Screen name="ScreenTabs" component={Navigation} /> */}
             <Stack.Screen name="Details" component={Details} />
             <Stack.Screen name="Reader" component={Reader} />
+            <Stack.Screen name="Downloads" component={Downloads} />
           </Stack.Navigator>
         </SQLiteProvider>
       </Suspense>
