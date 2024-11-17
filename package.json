@@ -1,6 +1,6 @@
 {
   "name": "bookme",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
