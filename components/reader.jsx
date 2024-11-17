@@ -244,8 +244,9 @@ export default function Reader({ navigation, route }) {
             enableDoubleTapZoom={true}
             enablePaging={false}
             onError={(error) => {
-              console.log(error);
+              // console.log(error);
               setError(true);
+              setLoading(false);
             }}
             onPressLink={(uri) => {
               console.log(`Link pressed: ${uri}`);

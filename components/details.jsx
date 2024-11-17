@@ -73,7 +73,7 @@ const Details = ({ navigation, route }) => {
         await FileSystem.makeDirectoryAsync(downloadsPath, {
           intermediates: true,
         });
-        console.log("Downloads directory created");
+        // console.log("Downloads directory created");
       }
 
       // Check if the file already exists
