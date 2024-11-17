@@ -32,7 +32,7 @@ const Card = ({
     db.withTransactionAsync(async () => {
       await db.runAsync(
         `
-        INSERT INTO Recent (Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?);
+        INSERT INTO Recent (title,authors,description,poster,lang,size,book_url,download_server,Ext) VALUES (?,?,?,?,?,?,?,?,?);
       `,
         [
           Title,

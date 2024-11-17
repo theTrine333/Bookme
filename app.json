@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bookme",
     "slug": "Bookme",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -17,7 +17,6 @@
     },
     "android": {
       "permissions": [
-        "android.permission.SET_WALLPAPER",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE"
       ],
@@ -41,7 +40,19 @@
     "updates": {
       "url": "https://u.expo.dev/b769ac1f-0cd5-474c-86f9-854f531228fe"
     },
-    "plugins": ["expo-asset", "expo-router"]
+    "plugins": [
+      "expo-asset",
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ]
+    ]
   },
   "react-native-google-mobile-ads": {
     "android_app_id": "ca-app-pub-5482160285556109~6596192696"

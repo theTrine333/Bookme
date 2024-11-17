@@ -4,13 +4,19 @@ import { ActivityIndicator } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import DCard from "../components/dcard";
 import { useNavigation } from "@react-navigation/native";
-import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import {
+  AdEventType,
+  BannerAd,
+  BannerAdSize,
+} from "react-native-google-mobile-ads";
 import { height, width } from "../components/bookCard";
-
+import { downloadPageView } from "../api/api";
 const Downloads = () => {
   const [results, setResults] = useState({});
   const [isloading, setLoading] = useState(false);
   const [error, isError] = useState(false);
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [shouldShowAd, setShouldShowAd] = useState(true);
   const db = useSQLiteContext();
   const navigation = useNavigation();
 
@@ -21,10 +27,8 @@ const Downloads = () => {
     setResults(result);
     // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
-
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      // Function to run when the screen is focused
       db.withTransactionAsync(async () => {
         await getData();
       });
@@ -57,7 +61,14 @@ const Downloads = () => {
         </View>
       ) : results.length === 0 ? (
         <View
-          style={{ flex: 1, justifyContent: "center", alignContent: "center" }}
+          style={{
+            alignSelf: "center",
+            height: height * 0.4,
+            width: width * 0.9,
+            marginTop: 10,
+            justifyContent: "center",
+            alignContent: "center",
+          }}
         >
           <Image
             source={require("../assets/icons/1.png")}
@@ -83,7 +94,7 @@ const Downloads = () => {
         <View
           style={{
             alignSelf: "center",
-            maxHeight: height * 0.723,
+            maxHeight: height * 0.57,
             minWidth: width * 0.97,
             backgroundColor: '"rgb(220,220,220)',
             borderRadius: 12,
@@ -107,7 +118,7 @@ const Downloads = () => {
               />
             )}
             keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{ gap: 10 }}
+            contentContainerStyle={{ gap: 10, paddingBottom: 60 }}
             vertical
             showsVerticalScrollIndicator={false}
           />
@@ -131,7 +142,7 @@ const styles = StyleSheet.create({
   headerView: {
     backgroundColor: "grey",
     alignItems: "center",
-    paddingTop: 60,
+    paddingTop: 100,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     paddingBottom: 20,
@@ -156,8 +167,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   image: {
-    height: 80,
-    width: 80,
+    height: 120,
+    width: 120,
   },
   retryButton: {
     paddingTop: 10,

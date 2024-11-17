@@ -29,15 +29,15 @@ const DCard = ({
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("Details", {
+        navigation.navigate("Reader", {
           Poster: bookPoster || "https://libgen.li/img/blank.png",
-          title: Title,
+          bookTitle: Title,
           authors: authors,
           lang: lang,
           size: size,
           Ext: Ext,
           description: Description,
-          bookurl: bookUrl,
+          bookUrl: bookUrl,
           Server: download_server,
         });
       }}

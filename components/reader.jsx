@@ -1,19 +1,23 @@
 import { StatusBar } from "expo-status-bar";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   SafeAreaView,
-  Button,
   Text,
+  Share,
   View,
   TouchableOpacity,
   Modal,
   Dimensions,
-  Share,
+  ActivityIndicator,
+  Image,
+  Alert,
 } from "react-native";
 import Pdf from "react-native-pdf";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { TextInput } from "react-native";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 export default function Reader({ navigation, route }) {
   const book_url = route.params.bookUrl;
   const book_Title = route.params.bookTitle;
@@ -24,6 +28,73 @@ export default function Reader({ navigation, route }) {
   const [currentPage, setCurrentPage] = useState("0");
   const [pageText, setpageText] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [downlaoding, setDownload] = useState(false);
+  const [isFile, setIsFile] = useState(false);
+  async function downloadFile() {
+    const fileUrl = book_url;
+    setDownload(true);
+    try {
+      const title = `${route.params.title}`.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+      const downloadsPath = `${FileSystem.documentDirectory}Downloads/`;
+      const filePath = `${downloadsPath}${title}.pdf`;
+      const dirInfo = await FileSystem.getInfoAsync(downloadsPath);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(downloadsPath, {
+          intermediates: true,
+        });
+      }
+
+      // Check if the file already exists
+      const fileInfo = await FileSystem.getInfoAsync(filePath);
+      if (fileInfo.exists) {
+        Alert.alert("File conficts", "The file is already downloaded.", [
+          {
+            text: "Cancel",
+            style: "cancel",
+            onPress: () => {},
+          },
+        ]);
+        return; // Exit the function if the file exists
+      }
+
+      // Download the file
+
+      try {
+        const result = await FileSystem.downloadAsync(fileUrl, filePath).then(
+          () => {
+            Alert.alert(
+              "Download complete",
+              "Your file has been downloaded and is available in your downloads page",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                  onPress: () => {},
+                },
+              ]
+            );
+          }
+        );
+      } catch (error) {}
+      setDownload(false);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  }
+  function checkUrl(url) {
+    if (url.startsWith("https://")) {
+      return true;
+    } else if (url.startsWith("file://")) {
+      return false;
+    }
+    return null;
+  }
+  useEffect(() => {
+    const fileState = checkUrl(book_url);
+    setIsFile(fileState);
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <Modal
@@ -79,19 +150,34 @@ export default function Reader({ navigation, route }) {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={[
-                styles.modalSubView,
-                { alignSelf: "center", padding: 10 },
-              ]}
-            >
-              <Text style={styles.modalText}>Save</Text>
-              <AntDesign
-                name="clouddownloado"
-                size={25}
-                style={{ marginTop: 2 }}
-              />
-            </TouchableOpacity>
+            {downlaoding ? (
+              <View
+                style={[
+                  styles.modalSubView,
+                  { alignSelf: "center", padding: 10 },
+                ]}
+              >
+                <Text style={styles.modalText}>Save</Text>
+                <ActivityIndicator size={25} />
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[
+                  styles.modalSubView,
+                  { alignSelf: "center", padding: 10 },
+                ]}
+                onPress={() => {
+                  downloadFile();
+                }}
+              >
+                <Text style={styles.modalText}>Save</Text>
+                <AntDesign
+                  name="clouddownloado"
+                  size={25}
+                  style={{ marginTop: 2 }}
+                />
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={[
@@ -99,11 +185,14 @@ export default function Reader({ navigation, route }) {
                 { alignSelf: "center", padding: 10 },
               ]}
               onPress={async () => {
-                await Share.share({
-                  message: `Check out this book ${book_Title}`,
-                  title: "Bookme",
-                  url: `${book_url}`,
-                });
+                if (isFile) {
+                  Share.share({
+                    message: `Check out this book ${book_Title} at ${book_url} downloaded by Bookme app`,
+                    title: "Share Bookme",
+                  });
+                } else {
+                  Sharing.shareAsync(book_url);
+                }
               }}
             >
               <Text style={styles.modalText}>Share</Text>
@@ -125,61 +214,94 @@ export default function Reader({ navigation, route }) {
           </View>
         </View>
       </Modal>
-      <Pdf
-        trustAllCerts={false}
-        ref={pdfRef}
-        page={Number(pageText)}
-        source={pdfSource}
-        onLoadComplete={(numberOfPages, filePath) => {
-          setTotalPages(numberOfPages);
-        }}
-        onPageChanged={(page, numberOfPages) => {
-          setCurrentPage(`${page}`);
-        }}
-        enableDoubleTapZoom={true}
-        enablePaging={false}
-        onError={(error) => {
-          console.log(error);
-        }}
-        onPressLink={(uri) => {
-          console.log(`Link pressed: ${uri}`);
-        }}
-        style={StyleSheet.absoluteFill}
-      />
-      <TouchableOpacity
-        style={{
-          position: "absolute",
-          alignSelf: "center",
-          paddingVertical: 15,
-          paddingHorizontal: 15,
-          borderBottomLeftRadius: 8,
-          borderTopRightRadius: 8,
-          bottom: 20,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          flex: 1,
-          gap: 10,
-          flexDirection: "row",
-          shadowRadius: 4,
-          elevation: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-        onPress={() => {
-          setModalVisible(true);
-        }}
-      >
-        <Text style={styles.pageText}>
-          {currentPage}/{totalPages}
-        </Text>
-        <AntDesign name="menufold" size={15} color="grey" />
-      </TouchableOpacity>
 
-      <StatusBar style="dark" />
+      {error ? (
+        <Image
+          source={require("../assets/icons/error_loading.jpg")}
+          style={{
+            height: 180,
+            width: 180,
+            alignSelf: "center",
+            position: "absolute",
+            bottom: height * 0.4,
+            borderRadius: 12,
+          }}
+        />
+      ) : (
+        <>
+          <Pdf
+            trustAllCerts={false}
+            ref={pdfRef}
+            page={Number(pageText)}
+            source={pdfSource}
+            onLoadComplete={(numberOfPages, filePath) => {
+              setTotalPages(numberOfPages);
+              setLoading(false);
+            }}
+            onPageChanged={(page, numberOfPages) => {
+              setCurrentPage(`${page}`);
+            }}
+            enableDoubleTapZoom={true}
+            enablePaging={false}
+            onError={(error) => {
+              console.log(error);
+              setError(true);
+            }}
+            onPressLink={(uri) => {
+              console.log(`Link pressed: ${uri}`);
+            }}
+            style={StyleSheet.absoluteFill}
+          />
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              alignSelf: "center",
+              paddingVertical: 15,
+              paddingHorizontal: 15,
+              borderBottomLeftRadius: 8,
+              borderTopRightRadius: 8,
+              bottom: 20,
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.25,
+              flex: 1,
+              gap: 10,
+              flexDirection: "row",
+              shadowRadius: 4,
+              elevation: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onPress={() => {
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.pageText}>
+              {currentPage}/{totalPages}
+            </Text>
+            <AntDesign name="menufold" size={15} color="grey" />
+          </TouchableOpacity>
+        </>
+      )}
+
+      {loading ? (
+        <View
+          style={{
+            position: "absolute",
+            bottom: height * 0.48,
+            alignSelf: "center",
+          }}
+        >
+          <ActivityIndicator size={33} color={"rgb(255,140,0)"} />
+        </View>
+      ) : (
+        <></>
+      )}
+
+      <StatusBar style="dark" hidden={true} />
     </SafeAreaView>
   );
 }
@@ -191,7 +313,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
     width: "100%",
   },
   centeredView: {

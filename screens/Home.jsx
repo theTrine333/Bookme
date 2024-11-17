@@ -7,19 +7,29 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card, { height, width } from "../components/bookCard";
 import { ActivityIndicator } from "react-native";
 import { getSearch } from "../api/api";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { StatusBar } from "expo-status-bar";
 import * as IconsOutline from "react-native-heroicons/outline";
+import { useSQLiteContext } from "expo-sqlite";
 export default function Home({ navigation }) {
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [error, isError] = useState(false);
   const [isFetched, setFetched] = useState(false);
   const [results, setResults] = useState([]);
+  const db = useSQLiteContext();
+  async function getData() {
+    const result = await db.getAllAsync(
+      `SELECT * FROM Recent ORDER BY ID DESC;`
+    );
+    setResults(result);
+    setLoading(false);
+    // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
+  }
 
   const fetchBook = async () => {
     setLoading(true);
@@ -32,12 +42,22 @@ export default function Home({ navigation }) {
         } else {
           isError(false);
           setResults(books);
+          // console.log(
+          //   "Books fetched : \n" + JSON.stringify(books, undefined, 2)
+          // );
         }
       })
       .catch((error) => {
         isError(true);
       });
   };
+
+  useEffect(() => {
+    db.withTransactionAsync(async () => {
+      await getData();
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.headerView}>
@@ -58,6 +78,7 @@ export default function Home({ navigation }) {
               alignItems: "center",
               flexDirection: "row",
               gap: 5,
+              paddingRight: 20,
               justifyContent: "center",
             }}
           >
@@ -123,6 +144,8 @@ export default function Home({ navigation }) {
           <View
             style={{
               alignSelf: "center",
+              // minHeight: height * 0.723,
+              // maxHeight: height * 0.78,
               maxHeight: height * 0.723,
               minWidth: width * 0.97,
               backgroundColor: '"rgb(220,220,220)',

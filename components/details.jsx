@@ -9,8 +9,9 @@ import {
   Button,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-import * as Linking from "expo-linking";
+
 import { React, useState, useEffect, useRef } from "react";
 import * as Fetch from "../api/api";
 import { InterstitialAd, AdEventType } from "react-native-google-mobile-ads";
@@ -18,6 +19,8 @@ import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { useSQLiteContext } from "expo-sqlite";
 import Octicons from "@expo/vector-icons/Octicons";
 import Feather from "@expo/vector-icons/Feather";
+import { StatusBar } from "expo-status-bar";
+import * as FileSystem from "expo-file-system";
 const adUnitId = "ca-app-pub-5482160285556109/3851781686";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -34,30 +37,91 @@ const Details = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [Description, setDescription] = useState("");
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState();
   const bannerRef = useRef(null);
-  const { width, height } = Dimensions.get("window");
-
+  const { width, height } = Dimensions.get("screen");
+  const cacheDir = FileSystem.documentDirectory + "Downloads";
   const db = useSQLiteContext();
+  async function insertTransaction(fileUrl) {
+    await db.runAsync(
+      "INSERT INTO Downloads (Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?)",
+      [
+        route.params.title,
+        route.params.authors,
+        route.params.description,
+        route.params.Poster,
+        route.params.lang,
+        route.params.size,
+        fileUrl,
+        route.params.Server,
+        route.params.Ext,
+      ]
+    );
+  }
 
-  async function insertTransaction() {
-    db.withTransactionAsync(async () => {
-      await db.runAsync(
-        `
-            INSERT INTO Downloads (Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?);
-          `,
-        [
-          route.params.title,
-          route.params.authors,
-          route.params.description,
-          route.params.Poster,
-          route.params.lang,
-          route.params.size,
-          route.params.bookurl,
-          route.params.Server,
-          route.params.Ext,
-        ]
+  async function downloadFile(fileUrl) {
+    try {
+      const title = `${route.params.title}`.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+      const downloadsPath = `${FileSystem.documentDirectory}Downloads/`;
+      const filePath = `${downloadsPath}${title}.pdf`;
+      const dirInfo = await FileSystem.getInfoAsync(downloadsPath);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(downloadsPath, {
+          intermediates: true,
+        });
+        console.log("Downloads directory created");
+      }
+
+      // Check if the file already exists
+      const fileInfo = await FileSystem.getInfoAsync(filePath);
+      if (fileInfo.exists) {
+        Alert.alert(
+          "File conficts",
+          "The file is already downloaded." +
+            "\n" +
+            "Do you want to open it instead?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => {},
+            },
+            {
+              text: "Open",
+              style: "default",
+              onPress: () => {
+                navigation.navigate("Reader", {
+                  bookUrl: filePath,
+                  bookTitle: `${route.params.title}`,
+                });
+              },
+            },
+          ]
+        );
+        return; // Exit the function if the file exists
+      }
+
+      // Download the file
+      const result = await FileSystem.downloadAsync(fileUrl, filePath).then(
+        () => {
+          Alert.alert(
+            "Download complete",
+            "Your file has been downloaded and is available in your downloads page",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => {},
+              },
+            ]
+          );
+        }
       );
-    });
+      insertTransaction(filePath);
+      setdownLoading(false);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
   }
 
   useEffect(() => {
@@ -68,7 +132,9 @@ const Details = ({ navigation, route }) => {
       }
     );
     interstitial.load();
-
+    try {
+      interstitial.show();
+    } catch {}
     Fetch.getBookDetails(url)
       .then((details) => {
         setLoading(false);
@@ -117,57 +183,36 @@ const Details = ({ navigation, route }) => {
         <View
           style={{ width: width * 0.95, paddingTop: 10, paddingBottom: 10 }}
         >
-          {downloading ? (
-            <View style={styles.headerCardContainer}>
-              <ActivityIndicator size="large" color={"rgba(255,140,0,255)"} />
-            </View>
-          ) : started ? (
-            <>
-              <Text style={styles.infoText}>
-                Download is ongoing on browser
-              </Text>
-              <BannerAd
-                size={BannerAdSize.BANNER}
-                unitId="ca-app-pub-5482160285556109/4302126257"
-                onAdLoaded={() => {}}
-                onAdFailedToLoad={() => {}}
-              />
-            </>
-          ) : (
-            <>
-              <View style={styles.btns}></View>
-              <View style={{ flex: 1, alignSelf: "flex-start" }}>
-                <BannerAd
-                  ref={bannerRef}
-                  unitId={"ca-app-pub-5482160285556109/8138173373"}
-                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                />
-              </View>
-            </>
-          )}
+          <View style={{ flex: 1, alignSelf: "flex-start" }}>
+            <BannerAd
+              unitId={"ca-app-pub-5482160285556109/8138173373"}
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            />
+          </View>
         </View>
       </ScrollView>
-      <TouchableOpacity
-        style={styles.serverButton}
-        onPress={() => {
-          insertTransaction();
-          adLoaded ? (
-            () => {
-              interstitial.show();
-            }
-          ) : (
-            <></>
-          );
-          setdownLoading(true);
-          Fetch.extractLink(download_server).then((link) => {
-            setStarted(true);
-            Linking.openURL(`${link}`);
-            setdownLoading(false);
-          });
-        }}
-      >
-        <Octicons name="download" size={20} color={"white"} />
-      </TouchableOpacity>
+
+      {downloading ? (
+        <View style={styles.serverButton}>
+          <ActivityIndicator color={"white"} />
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.serverButton}
+          onPress={() => {
+            setdownLoading(true);
+            Fetch.extractLink(download_server).then((link) => {
+              setStarted(true);
+              downloadFile(link);
+
+              // // Linking.openURL(`${link}`);
+              // setdownLoading(false);
+            });
+          }}
+        >
+          <Octicons name="download" size={20} color={"white"} />
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.readButton}
@@ -190,6 +235,7 @@ const Details = ({ navigation, route }) => {
         <Feather name="book-open" size={20} color={"white"} />
         <Text style={styles.btnText}>READ ONLINE</Text>
       </TouchableOpacity>
+      <StatusBar style="dark" />
     </View>
   );
 };
@@ -199,8 +245,6 @@ const { height, width } = Dimensions.get("screen");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
-    alignContent: "flex-start",
     paddingLeft: 5,
     paddingTop: 45,
   },
