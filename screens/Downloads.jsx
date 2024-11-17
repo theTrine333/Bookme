@@ -22,6 +22,7 @@ const Downloads = () => {
 
   async function getData() {
     setLoading(true);
+
     const result = await db.getAllAsync(
       "SELECT * FROM Downloads ORDER BY ID DESC;"
     );
@@ -30,13 +31,8 @@ const Downloads = () => {
     // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
   useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      db.withTransactionAsync(async () => {
-        await getData();
-      });
-    });
-    return unsubscribe;
-  }, [navigation]);
+    getData();
+  }, []);
 
   return (
     <View style={styles.container}>

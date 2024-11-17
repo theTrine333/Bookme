@@ -5,7 +5,7 @@ import {
   Text,
   Dimensions,
   View,
-  Pressable,
+  ToastAndroid,
   Button,
   TouchableOpacity,
   ActivityIndicator,
@@ -60,6 +60,10 @@ const Details = ({ navigation, route }) => {
   }
 
   async function downloadFile(fileUrl) {
+    ToastAndroid.show(
+      "Downlaod stated, you will receive a notification",
+      ToastAndroid.SHORT
+    );
     try {
       const title = `${route.params.title}`.replace(/[^a-zA-Z0-9.\-_]/g, "_");
       const downloadsPath = `${FileSystem.documentDirectory}Downloads/`;
@@ -75,45 +79,49 @@ const Details = ({ navigation, route }) => {
       // Check if the file already exists
       const fileInfo = await FileSystem.getInfoAsync(filePath);
       if (fileInfo.exists) {
-        Alert.alert(
-          "File conficts",
-          "The file is already downloaded." +
-            "\n" +
-            "Do you want to open it instead?",
-          [
-            {
-              text: "Cancel",
-              style: "cancel",
-              onPress: () => {},
-            },
-            {
-              text: "Open",
-              style: "default",
-              onPress: () => {
-                navigation.navigate("Reader", {
-                  bookUrl: filePath,
-                  bookTitle: `${route.params.title}`,
-                });
-              },
-            },
-          ]
+        // Alert.alert(
+        //   "File conficts",
+        //   "The file is already downloaded." +
+        //     "\n" +
+        //     "Do you want to open it instead?",
+        //   [
+        //     {
+        //       text: "Cancel",
+        //       style: "cancel",
+        //       onPress: () => {},
+        //     },
+        //     {
+        //       text: "Open",
+        //       style: "default",
+        //       onPress: () => {
+        //         navigation.navigate("Reader", {
+        //           bookUrl: filePath,
+        //           bookTitle: `${route.params.title}`,
+        //         });
+        //       },
+        //     },
+        //   ]
+        // );
+        ToastAndroid.showWithGravityAndOffset(
+          "Downlaod completed",
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50
         );
+        insertTransaction(filePath);
         return; // Exit the function if the file exists
       }
 
       // Download the file
       const result = await FileSystem.downloadAsync(fileUrl, filePath).then(
         () => {
-          Alert.alert(
-            "Download complete",
-            "Your file has been downloaded and is available in your downloads page",
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
-                onPress: () => {},
-              },
-            ]
+          ToastAndroid.showWithGravityAndOffset(
+            "Downlaod completed",
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50
           );
         }
       );
