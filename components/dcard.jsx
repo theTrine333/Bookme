@@ -1,10 +1,17 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { React, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSQLiteContext } from "expo-sqlite";
 import { height, width } from "./bookCard";
-
+import * as FileSystem from "expo-file-system";
 const DCard = ({
   bookUrl,
   Title,
@@ -15,6 +22,7 @@ const DCard = ({
   size,
   Ext,
   download_server,
+  reloadFunction,
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, isLoading] = useState(false);
@@ -25,6 +33,7 @@ const DCard = ({
     await db.runAsync(`DELETE FROM Downloads where Link=$Link`, {
       $Link: `${download_server}`,
     });
+    await FileSystem.deleteAsync(bookUrl).then(reloadFunction);
   }
   return (
     <TouchableOpacity
@@ -40,6 +49,26 @@ const DCard = ({
           bookUrl: bookUrl,
           Server: download_server,
         });
+      }}
+      onLongPress={() => {
+        Alert.alert(
+          "Delete invocked",
+          "You have long pressed this item. Do you wish to delete it?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => {},
+            },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () => {
+                deleteDown();
+              },
+            },
+          ]
+        );
       }}
     >
       <View style={styles.card}>

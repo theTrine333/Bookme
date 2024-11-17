@@ -21,10 +21,12 @@ const Downloads = () => {
   const navigation = useNavigation();
 
   async function getData() {
+    setLoading(true);
     const result = await db.getAllAsync(
       "SELECT * FROM Downloads ORDER BY ID DESC;"
     );
     setResults(result);
+    setLoading(false);
     // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
   useEffect(() => {
@@ -115,6 +117,7 @@ const Downloads = () => {
                 Ext={item.Extension}
                 bookUrl={item.Url}
                 download_server={item.Link}
+                reloadFunction={getData}
               />
             )}
             keyExtractor={(item, index) => index.toString()}
