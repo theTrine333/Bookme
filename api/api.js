@@ -53,8 +53,7 @@ export async function getSearch(search) {
     // console.log(books);
     return books;
   } catch (error) {
-    console.log(error);
-    return error;
+    return [];
   }
 }
 
