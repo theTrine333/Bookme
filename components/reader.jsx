@@ -49,6 +49,7 @@ export default function Reader({ navigation, route }) {
       // Check if the file already exists
       const fileInfo = await FileSystem.getInfoAsync(filePath);
       if (fileInfo.exists) {
+        setDownload(false);
         Alert.alert("File conficts", "The file is already downloaded.", [
           {
             text: "Cancel",
