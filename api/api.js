@@ -12,6 +12,7 @@ export async function getSearch(search) {
     const books = [];
 
     const $ = cheerio.load(response.data);
+    _;
     const bookLists = $("table.table.table-striped tbody").find("tr");
 
     bookLists.each((index, element) => {
@@ -93,27 +94,3 @@ export async function extractLink(url) {
     return error;
   }
 }
-
-/* export async function downloadPdf(link, title) {
-  const { config, fs } = RNFetchBlob;
-  const downloads = fs.dirs.CacheDir;
-  const commonConfig = {
-    fileCache: true,
-    useDownloadManager: true,
-    notification: false,
-    title: `${title}`,
-    path: `${downloads}/${title}.pdf`,
-    mediaScannable: true,
-    description: `Bookme download`,
-  };
-
-  const configOptions = Platform.select({
-    ios: {
-      fileCache: commonConfig.fileCache,
-      title: commonConfig.title,
-      path: commonConfig.path,
-      appendExt: "pdf",
-    },
-    android: commonConfig,
-  });
-} */
