@@ -16,10 +16,6 @@
       "bundleIdentifier": "com.tesla254.Bookme"
     },
     "android": {
-      "permissions": [
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE"
-      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#fff"
