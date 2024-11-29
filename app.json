@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bookme",
     "slug": "Bookme",
-    "version": "1.0.12",
+    "version": "1.0.14",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
