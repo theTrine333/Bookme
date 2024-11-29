@@ -151,7 +151,7 @@ export default function Reader({ navigation, route }) {
               </View>
             </View>
 
-            {downlaoding ? (
+            {/* {downlaoding ? (
               <View
                 style={[
                   styles.modalSubView,
@@ -178,7 +178,7 @@ export default function Reader({ navigation, route }) {
                   style={{ marginTop: 2 }}
                 />
               </TouchableOpacity>
-            )}
+            )} */}
 
             <TouchableOpacity
               style={[
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     gap: 10,
     flexDirection: "row",
-    width: width * 0.8,
+    width: width * 0.6,
     height: height * 0.1,
     backgroundColor: "white",
     borderRadius: 20,

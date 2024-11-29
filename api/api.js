@@ -12,7 +12,6 @@ export async function getSearch(search) {
     const books = [];
 
     const $ = cheerio.load(response.data);
-    _;
     const bookLists = $("table.table.table-striped tbody").find("tr");
 
     bookLists.each((index, element) => {
@@ -54,6 +53,8 @@ export async function getSearch(search) {
     // console.log(books);
     return books;
   } catch (error) {
+    console.log("Error", error);
+
     return [];
   }
 }
