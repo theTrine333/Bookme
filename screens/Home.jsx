@@ -104,6 +104,16 @@ export default function Home({ navigation }) {
             onSubmitEditing={fetchBook}
           />
         </View>
+        {/* Version */}
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: 10,
+            paddingTop: 10,
+          }}
+        >
+          V1.0.15
+        </Text>
       </View>
       <View>
         {isLoading ? (

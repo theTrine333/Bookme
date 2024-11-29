@@ -6,13 +6,11 @@ import {
   Dimensions,
   View,
   ToastAndroid,
-  Button,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 
-import { React, useState, useEffect, useRef } from "react";
+import { React, useState, useEffect } from "react";
 import * as Fetch from "../api/api";
 import { InterstitialAd, AdEventType } from "react-native-google-mobile-ads";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
@@ -38,7 +36,6 @@ const Details = ({ navigation, route }) => {
   const [Description, setDescription] = useState("");
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState();
-  const bannerRef = useRef(null);
   const { width, height } = Dimensions.get("screen");
   const cacheDir = FileSystem.documentDirectory + "Downloads";
   const db = useSQLiteContext();
