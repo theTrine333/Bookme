@@ -84,7 +84,7 @@ const Details = ({ navigation, route }) => {
           const progressPercentage =
             downloadProgress.totalBytesWritten /
             downloadProgress.totalBytesExpectedToWrite;
-          console.log(progressPercentage);
+          // console.log(progressPercentage);
           setProgress(progressPercentage);
         }
       );
@@ -100,6 +100,8 @@ const Details = ({ navigation, route }) => {
           50
         );
         insertTransaction(filePath);
+        setModalVisible(false);
+        setdownLoading(false);
         return; // Exit the function if the file exists
       }
 
@@ -185,6 +187,9 @@ const Details = ({ navigation, route }) => {
                   marginTop: 10,
                   backgroundColor: "#E3002A",
                 }}
+                onPress={() => {
+                  setModalVisible(false);
+                }}
               >
                 <Text
                   style={{
@@ -193,7 +198,7 @@ const Details = ({ navigation, route }) => {
                     fontWeight: "bold",
                   }}
                 >
-                  Cancel
+                  Dismiss
                 </Text>
               </TouchableOpacity>
             </View>
