@@ -8,6 +8,7 @@ import {
   ToastAndroid,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 
 import { React, useState, useEffect } from "react";
@@ -17,6 +18,7 @@ import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { useSQLiteContext } from "expo-sqlite";
 import Octicons from "@expo/vector-icons/Octicons";
 import Feather from "@expo/vector-icons/Feather";
+import * as Progress from "react-native-progress";
 import { StatusBar } from "expo-status-bar";
 import * as FileSystem from "expo-file-system";
 const adUnitId = "ca-app-pub-5482160285556109/3851781686";
@@ -27,6 +29,7 @@ const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
 
 const Details = ({ navigation, route }) => {
   const url = route.params.bookurl;
+  const [modalVisible, setModalVisible] = useState(false);
   const poster = route.params.Poster;
   const download_server = route.params.Server;
   const [adLoaded, setadLoaded] = useState(false);
@@ -35,7 +38,7 @@ const Details = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [Description, setDescription] = useState("");
   const [error, setError] = useState(false);
-  const [isLoading, setIsLoading] = useState();
+  const [progress, setProgress] = useState(0);
   const { width, height } = Dimensions.get("screen");
   const cacheDir = FileSystem.documentDirectory + "Downloads";
   const db = useSQLiteContext();
@@ -57,6 +60,7 @@ const Details = ({ navigation, route }) => {
   }
 
   async function downloadFile(fileUrl) {
+    setModalVisible(true);
     ToastAndroid.show(
       "Downlaod stated, you will receive a notification",
       ToastAndroid.SHORT
@@ -72,33 +76,22 @@ const Details = ({ navigation, route }) => {
         });
         // console.log("Downloads directory created");
       }
+      const downloadResumable = FileSystem.createDownloadResumable(
+        fileUrl, // Replace with your file URL
+        filePath,
+        {},
+        (downloadProgress) => {
+          const progressPercentage =
+            downloadProgress.totalBytesWritten /
+            downloadProgress.totalBytesExpectedToWrite;
+          console.log(progressPercentage);
+          setProgress(progressPercentage);
+        }
+      );
 
       // Check if the file already exists
       const fileInfo = await FileSystem.getInfoAsync(filePath);
       if (fileInfo.exists) {
-        // Alert.alert(
-        //   "File conficts",
-        //   "The file is already downloaded." +
-        //     "\n" +
-        //     "Do you want to open it instead?",
-        //   [
-        //     {
-        //       text: "Cancel",
-        //       style: "cancel",
-        //       onPress: () => {},
-        //     },
-        //     {
-        //       text: "Open",
-        //       style: "default",
-        //       onPress: () => {
-        //         navigation.navigate("Reader", {
-        //           bookUrl: filePath,
-        //           bookTitle: `${route.params.title}`,
-        //         });
-        //       },
-        //     },
-        //   ]
-        // );
         ToastAndroid.showWithGravityAndOffset(
           "Downlaod completed",
           ToastAndroid.LONG,
@@ -111,19 +104,21 @@ const Details = ({ navigation, route }) => {
       }
 
       // Download the file
-      const result = await FileSystem.downloadAsync(fileUrl, filePath).then(
-        () => {
-          ToastAndroid.showWithGravityAndOffset(
-            "Downlaod completed",
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            25,
-            50
-          );
-        }
-      );
+      const { uri } = await downloadResumable.downloadAsync();
+      // const result = await FileSystem.downloadAsync(fileUrl, filePath).then(
+      //   () => {
+      //     ToastAndroid.showWithGravityAndOffset(
+      //       "Downlaod completed",
+      //       ToastAndroid.LONG,
+      //       ToastAndroid.BOTTOM,
+      //       25,
+      //       50
+      //     );
+      //   }
+      // );
       insertTransaction(filePath);
       setdownLoading(false);
+      setModalVisible(false);
     } catch (error) {
       console.error("Error downloading file:", error);
     }
@@ -153,6 +148,58 @@ const Details = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                Downloader
+              </Text>
+              <Progress.Circle
+                progress={progress}
+                size={90}
+                showsText={true}
+                style={{ alignSelf: "center", marginTop: 10 }}
+              />
+              <Text>Downloading:</Text>
+              <Text
+                numberOfLines={1}
+                style={{ fontWeight: "bold", color: "blue" }}
+              >
+                {route.params.title}
+              </Text>
+              <TouchableOpacity
+                style={{
+                  width: width * 0.73,
+                  height: height * 0.04,
+                  justifyContent: "center",
+                  alignSelf: "center",
+                  borderRadius: 12,
+                  marginTop: 10,
+                  backgroundColor: "#E3002A",
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: "white",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Image
           source={{ uri: route.params.Poster.replace("_small", "") }}
@@ -354,5 +401,40 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     justifyContent: "center",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  modalView: {
+    position: "absolute",
+    bottom: height * 0.38,
+    gap: 10,
+    flexDirection: "row",
+    width: width * 0.8,
+    height: height * 0.28,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  modalSubView: {
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "lightgrey",
+    borderRadius: 8,
+  },
+  modalText: {
+    fontSize: 11,
+    textAlign: "center",
   },
 });
