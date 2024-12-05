@@ -250,9 +250,14 @@ const Details = ({ navigation, route }) => {
       </ScrollView>
 
       {downloading ? (
-        <View style={styles.serverButton}>
+        <TouchableOpacity
+          style={styles.serverButton}
+          onPress={() => {
+            setModalVisible(true);
+          }}
+        >
           <ActivityIndicator color={"white"} />
-        </View>
+        </TouchableOpacity>
       ) : (
         <TouchableOpacity
           style={styles.serverButton}
