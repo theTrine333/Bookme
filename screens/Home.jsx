@@ -70,7 +70,9 @@ export default function Home({ navigation }) {
             />
             <View>
               <Text style={{ fontWeight: "bold" }}>Bookme</Text>
-              <Text style={{ fontSize: 12 }}>All in the library</Text>
+              <Text style={{ fontSize: 12, color: "lightgrey" }}>
+                All in the library
+              </Text>
             </View>
           </View>
           <View
@@ -84,10 +86,11 @@ export default function Home({ navigation }) {
           >
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Downloads");
+                // navigation.navigate("Downloads");
+                navigation.navigate("Reader");
               }}
             >
-              <IconsOutline.FolderArrowDownIcon size={28} color={"black"} />
+              <IconsOutline.FolderArrowDownIcon size={28} color={"white"} />
             </TouchableOpacity>
             {/* <TouchableOpacity>
               <IconsOutline.CogIcon size={31} color={"black"} />

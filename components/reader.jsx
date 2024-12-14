@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Image,
   Alert,
+  Switch,
 } from "react-native";
 import Pdf from "react-native-pdf";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -31,6 +32,8 @@ export default function Reader({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [downlaoding, setDownload] = useState(false);
+  const [horizontalView, setHorizontalView] = useState(false);
+  const [pageView, setPageView] = useState(false);
   const [isFile, setIsFile] = useState(false);
   async function downloadFile() {
     const fileUrl = book_url;
@@ -92,10 +95,10 @@ export default function Reader({ navigation, route }) {
     }
     return null;
   }
-  useEffect(() => {
-    const fileState = checkUrl(book_url);
-    setIsFile(fileState);
-  }, []);
+  // useEffect(() => {
+  //   const fileState = checkUrl(book_url);
+  //   setIsFile(fileState);
+  // }, []);
   return (
     <SafeAreaView style={styles.container}>
       <Modal
@@ -151,35 +154,36 @@ export default function Reader({ navigation, route }) {
               </View>
             </View>
 
-            {/* {downlaoding ? (
-              <View
-                style={[
-                  styles.modalSubView,
-                  { alignSelf: "center", padding: 10 },
-                ]}
-              >
-                <Text style={styles.modalText}>Save</Text>
-                <ActivityIndicator size={25} />
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={[
-                  styles.modalSubView,
-                  { alignSelf: "center", padding: 10 },
-                ]}
-                onPress={() => {
-                  downloadFile();
-                }}
-              >
-                <Text style={styles.modalText}>Save</Text>
-                <AntDesign
-                  name="clouddownloado"
-                  size={25}
-                  style={{ marginTop: 2 }}
-                />
-              </TouchableOpacity>
-            )} */}
+            <View
+              style={[
+                styles.modalSubView,
+                { alignSelf: "center", padding: 10 },
+              ]}
+            >
+              {horizontalView ? (
+                <Text style={styles.modalText}>Vertical</Text>
+              ) : (
+                <Text style={styles.modalText}>Horizontal</Text>
+              )}
+              <Switch
+                value={horizontalView}
+                onValueChange={setHorizontalView}
+              />
+            </View>
 
+            <View
+              style={[
+                styles.modalSubView,
+                { alignSelf: "center", padding: 10 },
+              ]}
+            >
+              {pageView ? (
+                <Text style={styles.modalText}> Fit View</Text>
+              ) : (
+                <Text style={styles.modalText}> Fill View</Text>
+              )}
+              <Switch value={pageView} onValueChange={setPageView} />
+            </View>
             <TouchableOpacity
               style={[
                 styles.modalSubView,
@@ -198,19 +202,6 @@ export default function Reader({ navigation, route }) {
             >
               <Text style={styles.modalText}>Share</Text>
               <AntDesign name="sharealt" size={25} style={{ marginTop: 2 }} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{ alignSelf: "center", padding: 10 }}
-              onPress={() => {
-                setModalVisible(false);
-              }}
-            >
-              <AntDesign
-                name="closecircleo"
-                size={25}
-                style={{ marginTop: 2 }}
-              />
             </TouchableOpacity>
           </View>
         </View>
@@ -243,7 +234,8 @@ export default function Reader({ navigation, route }) {
               setCurrentPage(`${page}`);
             }}
             enableDoubleTapZoom={true}
-            enablePaging={false}
+            enablePaging={pageView}
+            horizontal={horizontalView}
             onError={(error) => {
               // console.log(error);
               setError(true);
@@ -328,7 +320,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     gap: 10,
     flexDirection: "row",
-    width: width * 0.6,
+    width: width * 0.9,
     height: height * 0.1,
     backgroundColor: "white",
     borderRadius: 20,

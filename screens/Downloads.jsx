@@ -42,7 +42,14 @@ const Downloads = () => {
           style={styles.image}
           resizeMode="contain"
         />
-        <Text style={{ textAlign: "center", fontWeight: "bold", fontSize: 28 }}>
+        <Text
+          style={{
+            color: "white",
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: 28,
+          }}
+        >
           Downloads
         </Text>
       </View>
