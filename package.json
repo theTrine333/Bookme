@@ -1,6 +1,6 @@
 {
   "name": "bookme",
-  "version": "1.0.16",
+  "version": "1.0.18",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -22,7 +22,6 @@
     "expo-splash-screen": "^0.29.11",
     "expo-sqlite": "~15.0.3",
     "expo-status-bar": "~2.0.0",
-    "expo-updates": "~0.26.10",
     "react": "18.3.1",
     "react-native": "0.76.2",
     "react-native-blob-util": "^0.19.11",
