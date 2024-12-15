@@ -86,8 +86,7 @@ export default function Home({ navigation }) {
           >
             <TouchableOpacity
               onPress={() => {
-                // navigation.navigate("Downloads");
-                navigation.navigate("Reader");
+                navigation.navigate("Downloads");
               }}
             >
               <IconsOutline.FolderArrowDownIcon size={28} color={"white"} />

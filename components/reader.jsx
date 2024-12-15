@@ -95,10 +95,10 @@ export default function Reader({ navigation, route }) {
     }
     return null;
   }
-  // useEffect(() => {
-  //   const fileState = checkUrl(book_url);
-  //   setIsFile(fileState);
-  // }, []);
+  useEffect(() => {
+    const fileState = checkUrl(book_url);
+    setIsFile(fileState);
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <Modal
