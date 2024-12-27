@@ -114,7 +114,7 @@ export default function Home({ navigation }) {
             paddingTop: 10,
           }}
         >
-          V1.0.18
+          V1.0.19
         </Text>
       </View>
       <View>
