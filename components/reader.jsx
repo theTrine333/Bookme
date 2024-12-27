@@ -19,6 +19,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { TextInput } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { useSQLiteContext } from "expo-sqlite";
 export default function Reader({ navigation, route }) {
   const book_url = route.params.bookUrl;
   const book_Title = route.params.bookTitle;
@@ -35,6 +36,7 @@ export default function Reader({ navigation, route }) {
   const [horizontalView, setHorizontalView] = useState(false);
   const [pageView, setPageView] = useState(false);
   const [isFile, setIsFile] = useState(false);
+  const db = useSQLiteContext();
   async function downloadFile() {
     const fileUrl = book_url;
     setDownload(true);
@@ -95,9 +97,30 @@ export default function Reader({ navigation, route }) {
     }
     return null;
   }
+
+  const recorgnizeBook = async () => {
+    await db.runAsync(
+      `INSERT INTO Reads(name,page) VALUES ('${book_Title}',1);`
+    );
+  };
+  const rememberPage = async () => {
+    await db
+      .getFirstAsync(`SELECT page from Reads where name='${book_Title}';`)
+      .then((e) => {
+        setCurrentPage(`${e.page}`);
+      });
+  };
+  const updatedReadPage = async ({ page }) => {
+    await db.runAsync(
+      `UPDATE Reads where name='${book_Title}' set page=${page};`
+    );
+  };
+
   useEffect(() => {
     const fileState = checkUrl(book_url);
     setIsFile(fileState);
+    recorgnizeBook();
+    rememberPage();
   }, []);
   return (
     <SafeAreaView style={styles.container}>
@@ -232,6 +255,7 @@ export default function Reader({ navigation, route }) {
             }}
             onPageChanged={(page, numberOfPages) => {
               setCurrentPage(`${page}`);
+              updatedReadPage({ page });
             }}
             enableDoubleTapZoom={true}
             enablePaging={pageView}
