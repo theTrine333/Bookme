@@ -104,15 +104,18 @@ export default function Reader({ navigation, route }) {
     );
   };
   const rememberPage = async () => {
+    // setLoading(true);
     await db
       .getFirstAsync(`SELECT page from Reads where name='${book_Title}';`)
       .then((e) => {
-        setCurrentPage(`${e.page}`);
+        setpageText(Number(e.page));
+        // console.log("Data:", e.page);
       });
+    // setLoading(false);
   };
   const updatedReadPage = async ({ page }) => {
     await db.runAsync(
-      `UPDATE Reads where name='${book_Title}' set page=${page};`
+      `UPDATE Reads set page=${page} where name='${book_Title}';`
     );
   };
 
@@ -251,6 +254,7 @@ export default function Reader({ navigation, route }) {
             source={pdfSource}
             onLoadComplete={(numberOfPages, filePath) => {
               setTotalPages(numberOfPages);
+              // rememberPage();
               setLoading(false);
             }}
             onPageChanged={(page, numberOfPages) => {
