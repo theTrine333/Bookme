@@ -15,8 +15,9 @@ import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { StatusBar } from "expo-status-bar";
 import * as IconsOutline from "react-native-heroicons/outline";
 import { useSQLiteContext } from "expo-sqlite";
-import MenuContainer from "../components/MenuContainer";
-import MenuItem from "../components/MenuItem";
+import { Divider, Menu, PaperProvider } from "react-native-paper";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { exportDatabase } from "../api/database";
 export default function Home({ navigation }) {
   const [isLoading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -24,7 +25,7 @@ export default function Home({ navigation }) {
   const [isFetched, setFetched] = useState(false);
   const [results, setResults] = useState([]);
   const db = useSQLiteContext();
-  const [menuShown, setMenuShown] = useState(true);
+  const [menuShown, setMenuShown] = useState(false);
   async function getData() {
     const result = await db.getAllAsync(
       `SELECT * FROM Recent ORDER BY ID DESC;`
@@ -39,7 +40,6 @@ export default function Home({ navigation }) {
     getSearch(searchText)
       .then((books) => {
         setLoading(false);
-        // console.log("Books", books.length);
         if (books.length === 0) {
           isError(true);
         } else {
@@ -62,151 +62,187 @@ export default function Home({ navigation }) {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerView}>
-        <View style={styles.rowView}>
-          <View style={{ flexDirection: "row" }}>
-            <Image
-              source={require("../assets/icons/0.png")}
-              style={styles.image}
-              resizeMode="contain"
-            />
-            <View>
-              <Text style={{ fontWeight: "bold" }}>Bookme</Text>
-              <Text style={{ fontSize: 12, color: "lightgrey" }}>
-                All in the library
-              </Text>
+    <PaperProvider>
+      <View style={styles.container}>
+        <View style={styles.headerView}>
+          <View style={styles.rowView}>
+            <View style={{ flexDirection: "row" }}>
+              <Image
+                source={require("../assets/icons/0.png")}
+                style={styles.image}
+                resizeMode="contain"
+              />
+              <View>
+                <Text style={{ fontWeight: "bold" }}>Bookme</Text>
+                <Text style={{ fontSize: 12, color: "lightgrey" }}>
+                  All in the library
+                </Text>
+              </View>
             </View>
-          </View>
-          <View
-            style={{
-              alignItems: "center",
-              flexDirection: "row",
-              gap: 5,
-              paddingRight: 20,
-              justifyContent: "center",
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                setMenuShown(true);
-                // navigation.navigate("Downloads");
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+                gap: 5,
+                paddingRight: 20,
+                justifyContent: "center",
               }}
             >
-              <IconsOutline.Bars3Icon size={28} color={"white"} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.searchbox}>
-          <TextInput
-            placeholder="Search for a book"
-            style={styles.textInput}
-            onChangeText={(text) => {
-              setSearchText(text);
-            }}
-            onSubmitEditing={fetchBook}
-          />
-        </View>
-        {/* Version */}
-        <Text
-          style={{
-            textAlign: "center",
-            fontSize: 10,
-            paddingTop: 10,
-          }}
-        >
-          V1.0.20
-        </Text>
-      </View>
-      <MenuContainer shown={menuShown} setShown={setMenuShown}>
-        <MenuItem
-          Icon={() => (
-            <IconsOutline.FolderArrowDownIcon color={"black"} size={28} />
-          )}
-          text="Downloads"
-          action={() => {
-            navigation.navigate("Downloads");
-          }}
-        />
-      </MenuContainer>
-      <View>
-        {isLoading ? (
-          <ActivityIndicator
-            size={25}
-            color={"rgb(255,140,0)"}
-            style={{ marginTop: 10 }}
-          />
-        ) : error ? (
-          <View
-            style={{
-              alignContent: "center",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <Text style={{ textAlign: "center", color: "#E3002A" }}>
-              Something went wrong
-            </Text>
-            <Text style={{ textAlign: "center" }}>
-              Can't fetch data at the moment
-            </Text>
-            <TouchableOpacity style={styles.retryButton} onPress={fetchBook}>
-              <Text style={{ textAlign: "center" }}>Retry</Text>
-            </TouchableOpacity>
-          </View>
-        ) : results.length == 0 && isFetched ? (
-          <View>
-            <Text style={{ textAlign: "center", color: "#E3002A" }}>
-              No results found
-            </Text>
-            <BannerAd
-              unitId={"ca-app-pub-5482160285556109/4302126257"}
-              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-            />
-          </View>
-        ) : (
-          <View
-            style={{
-              alignSelf: "center",
-              maxHeight: height * 0.69,
-              minWidth: width * 0.97,
-              backgroundColor: '"rgb(220,220,220)',
-              borderRadius: 12,
-              paddingTop: 10,
-              marginTop: 10,
-            }}
-          >
-            <FlatList
-              data={results}
-              renderItem={({ item }) => (
-                <Card
-                  bookPoster={item.poster}
-                  Title={item.title}
-                  Description={item.description}
-                  lang={item.lang}
-                  size={item.size}
-                  authors={item.authors}
-                  Ext={item.Ext}
-                  bookUrl={item.book_url}
-                  download_server={item.download_server}
+              <Menu
+                visible={menuShown}
+                onDismiss={() => setMenuShown(false)}
+                style={{ paddingTop: 70 }}
+                anchor={
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMenuShown(true);
+                    }}
+                  >
+                    <IconsOutline.Bars3Icon size={28} color={"white"} />
+                  </TouchableOpacity>
+                }
+              >
+                <Menu.Item
+                  onPress={() => {
+                    navigation.navigate("Downloads");
+                  }}
+                  title="Downloads"
+                  leadingIcon={() => (
+                    <IconsOutline.FolderArrowDownIcon
+                      color={"white"}
+                      size={25}
+                    />
+                  )}
                 />
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={{ gap: 10, paddingBottom: 40 }}
-              vertical
-              showsVerticalScrollIndicator={false}
+                <Divider />
+                <Menu.Item
+                  onPress={() => {
+                    exportDatabase();
+                  }}
+                  title="Export DB"
+                  leadingIcon={() => (
+                    <MaterialCommunityIcons
+                      name="database-export-outline"
+                      size={26}
+                      color={"white"}
+                    />
+                  )}
+                />
+
+                <Menu.Item
+                  onPress={() => {}}
+                  title="Import DB"
+                  leadingIcon={() => (
+                    <MaterialCommunityIcons
+                      name="database-import-outline"
+                      size={26}
+                      color={"white"}
+                    />
+                  )}
+                />
+              </Menu>
+            </View>
+          </View>
+          <View style={styles.searchbox}>
+            <TextInput
+              placeholder="Search for a book"
+              style={styles.textInput}
+              onChangeText={(text) => {
+                setSearchText(text);
+              }}
+              onSubmitEditing={fetchBook}
             />
           </View>
-        )}
+          {/* Version */}
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 10,
+              paddingTop: 10,
+            }}
+          >
+            V1.0.20
+          </Text>
+        </View>
+        <View>
+          {isLoading ? (
+            <ActivityIndicator
+              size={25}
+              color={"rgb(255,140,0)"}
+              style={{ marginTop: 10 }}
+            />
+          ) : error ? (
+            <View
+              style={{
+                alignContent: "center",
+                justifyContent: "center",
+                marginTop: 10,
+              }}
+            >
+              <Text style={{ textAlign: "center", color: "#E3002A" }}>
+                Something went wrong
+              </Text>
+              <Text style={{ textAlign: "center" }}>
+                Can't fetch data at the moment
+              </Text>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchBook}>
+                <Text style={{ textAlign: "center" }}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : results.length == 0 && isFetched ? (
+            <View>
+              <Text style={{ textAlign: "center", color: "#E3002A" }}>
+                No results found
+              </Text>
+              <BannerAd
+                unitId={"ca-app-pub-5482160285556109/4302126257"}
+                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              />
+            </View>
+          ) : (
+            <View
+              style={{
+                alignSelf: "center",
+                maxHeight: height * 0.69,
+                minWidth: width * 0.97,
+                backgroundColor: '"rgb(220,220,220)',
+                borderRadius: 12,
+                paddingTop: 10,
+                marginTop: 10,
+              }}
+            >
+              <FlatList
+                data={results}
+                renderItem={({ item }) => (
+                  <Card
+                    bookPoster={item.poster}
+                    Title={item.title}
+                    Description={item.description}
+                    lang={item.lang}
+                    size={item.size}
+                    authors={item.authors}
+                    Ext={item.Ext}
+                    bookUrl={item.book_url}
+                    download_server={item.download_server}
+                  />
+                )}
+                keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={{ gap: 10, paddingBottom: 40 }}
+                vertical
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+          )}
+        </View>
+        <View style={{ position: "absolute", bottom: 1 }}>
+          <BannerAd
+            unitId={"ca-app-pub-5482160285556109/4302126257"}
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          />
+        </View>
+        <StatusBar style="auto" />
       </View>
-      <View style={{ position: "absolute", bottom: 1 }}>
-        <BannerAd
-          unitId={"ca-app-pub-5482160285556109/4302126257"}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        />
-      </View>
-      <StatusBar style="auto" />
-    </View>
+    </PaperProvider>
   );
 }
 
