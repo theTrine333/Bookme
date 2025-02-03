@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import Pdf from "react-native-pdf";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Foundation from "@expo/vector-icons/Foundation";
 import { TextInput } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
@@ -208,7 +209,14 @@ export default function Reader({ navigation, route }) {
               ) : (
                 <Text style={styles.modalText}> Fill View</Text>
               )}
-              <Switch value={pageView} onValueChange={setPageView} />
+              <TouchableOpacity onPress={() => setPageView(!pageView)}>
+                {pageView ? (
+                  <Foundation name="arrows-out" size={24} color="black" />
+                ) : (
+                  <Foundation name="arrows-in" size={24} color="black" />
+                )}
+              </TouchableOpacity>
+              {/* <Switch value={pageView} onValueChange={setPageView} /> */}
             </View>
             <TouchableOpacity
               style={[

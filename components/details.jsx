@@ -13,7 +13,12 @@ import {
 
 import { React, useState, useEffect } from "react";
 import * as Fetch from "../api/api";
-import { InterstitialAd, AdEventType } from "react-native-google-mobile-ads";
+import {
+  InterstitialAd,
+  AdEventType,
+  RewardedInterstitialAd,
+  RewardedAdEventType,
+} from "react-native-google-mobile-ads";
 import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { useSQLiteContext } from "expo-sqlite";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -22,11 +27,16 @@ import * as Progress from "react-native-progress";
 import { StatusBar } from "expo-status-bar";
 import * as FileSystem from "expo-file-system";
 const adUnitId = "ca-app-pub-5482160285556109/3851781686";
-
+const videoAdUnit = "ca-app-pub-5482160285556109/9470404750";
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-  keywords: ["fashion", "clothing"],
+  keywords: ["books", "eference"],
 });
-
+const rewardedInterstitial = RewardedInterstitialAd.createForAdRequest(
+  videoAdUnit,
+  {
+    keywords: ["books", "reference"],
+  }
+);
 const Details = ({ navigation, route }) => {
   const url = route.params.bookurl;
   const [modalVisible, setModalVisible] = useState(false);
@@ -125,6 +135,27 @@ const Details = ({ navigation, route }) => {
       console.error("Error downloading file:", error);
     }
   }
+  useEffect(() => {
+    setdownLoading(true);
+    const rewardunsubscribeLoaded = rewardedInterstitial.addAdEventListener(
+      RewardedAdEventType.LOADED,
+      () => {
+        setdownLoading(false);
+        rewardedInterstitial.show();
+      }
+    );
+    const rewardunsubscribeEarned = rewardedInterstitial.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      (reward) => {
+        console.log("User earned reward of ", reward);
+      }
+    );
+    rewardedInterstitial.load();
+    return () => {
+      rewardunsubscribeLoaded();
+      rewardunsubscribeEarned();
+    };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = interstitial.addAdEventListener(

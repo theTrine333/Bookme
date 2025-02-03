@@ -56,6 +56,8 @@ export default function Home({ navigation }) {
     db.withTransactionAsync(async () => {
       await getData();
     });
+    setSearchText("java");
+    fetchBook();
   }, []);
 
   return (
@@ -156,9 +158,7 @@ export default function Home({ navigation }) {
           <View
             style={{
               alignSelf: "center",
-              // minHeight: height * 0.723,
-              // maxHeight: height * 0.78,
-              maxHeight: height * 0.723,
+              maxHeight: height * 0.69,
               minWidth: width * 0.97,
               backgroundColor: '"rgb(220,220,220)',
               borderRadius: 12,

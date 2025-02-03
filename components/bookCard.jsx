@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
   Pressable,
   Button,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import { React, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import details from "./details";
 import { useSQLiteContext } from "expo-sqlite";
+import { Image } from "expo-image";
 const Card = ({
   bookUrl,
   Title,
@@ -73,8 +73,8 @@ const Card = ({
             height: 100,
             width: 100,
             borderRadius: 8,
-            resizeMode: "contain",
           }}
+          resizeMode="contain"
         />
         <View style={styles.detailsContainer}>
           <Text style={styles.heading} numberOfLines={3}>

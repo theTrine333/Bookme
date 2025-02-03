@@ -17,6 +17,8 @@ import { SQLiteProvider } from "expo-sqlite";
 import * as SplashScreen from "expo-splash-screen";
 import Downloads from "./screens/Downloads";
 import { height } from "./components/bookCard";
+import { Provider } from "react-redux";
+import store from "./store/st";
 SplashScreen.preventAutoHideAsync();
 const loadDatabase = async () => {
   const dbName = "bookme.db";
@@ -93,39 +95,41 @@ export default function App() {
       </>
     );
   return (
-    <NavigationContainer>
-      <StatusBar style="dark" />
-      <Suspense
-        fallback={
-          <>
-            <View style={styles.headerView}>
-              <Image
-                source={require("./assets/icons/0.png")}
-                style={styles.image}
-                resizeMode="contain"
+    <Provider store={store}>
+      <NavigationContainer>
+        <StatusBar style="dark" />
+        <Suspense
+          fallback={
+            <>
+              <View style={styles.headerView}>
+                <Image
+                  source={require("./assets/icons/0.png")}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
+                <StatusBar style="auto" />
+              </View>
+              <ActivityIndicator
+                size={25}
+                color={"rgb(255,140,0)"}
+                style={{ marginTop: 10 }}
               />
-              <StatusBar style="auto" />
-            </View>
-            <ActivityIndicator
-              size={25}
-              color={"rgb(255,140,0)"}
-              style={{ marginTop: 10 }}
-            />
-          </>
-        }
-      >
-        <SQLiteProvider databaseName="bookme.db" useSuspense>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={Home} />
-            {/* <Stack.Screen name="Startup" component={Startup} /> */}
-            {/* <Stack.Screen name="ScreenTabs" component={Navigation} /> */}
-            <Stack.Screen name="Details" component={Details} />
-            <Stack.Screen name="Reader" component={Reader} />
-            <Stack.Screen name="Downloads" component={Downloads} />
-          </Stack.Navigator>
-        </SQLiteProvider>
-      </Suspense>
-    </NavigationContainer>
+            </>
+          }
+        >
+          <SQLiteProvider databaseName="bookme.db" useSuspense>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Home" component={Home} />
+              {/* <Stack.Screen name="Startup" component={Startup} /> */}
+              {/* <Stack.Screen name="ScreenTabs" component={Navigation} /> */}
+              <Stack.Screen name="Details" component={Details} />
+              <Stack.Screen name="Reader" component={Reader} />
+              <Stack.Screen name="Downloads" component={Downloads} />
+            </Stack.Navigator>
+          </SQLiteProvider>
+        </Suspense>
+      </NavigationContainer>
+    </Provider>
   );
 }
 
