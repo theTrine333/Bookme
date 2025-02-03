@@ -141,7 +141,6 @@ const Details = ({ navigation, route }) => {
       RewardedAdEventType.LOADED,
       () => {
         setdownLoading(false);
-        rewardedInterstitial.show();
       }
     );
     const rewardunsubscribeEarned = rewardedInterstitial.addAdEventListener(

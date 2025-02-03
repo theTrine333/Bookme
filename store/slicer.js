@@ -3,8 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   library: [],
   currentBook: null,
-  downloadedBooks: [],
-  downloadedCount: 0, // Add this line to track the download count
+  downloadedBooks: [{}],
+  downloadedCount: 0,
 };
 
 const booksSlice = createSlice({
@@ -19,7 +19,7 @@ const booksSlice = createSlice({
     },
     addDownloadedBook: (state, action) => {
       state.downloadedBooks.push(action.payload);
-      state.downloadedCount += 1; // Increment the download count
+      state.downloadedCount += 1;
     },
     removeDownloadedBook: (state, action) => {
       state.downloadedBooks = state.downloadedBooks.filter(

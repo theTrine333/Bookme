@@ -15,6 +15,8 @@ import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { StatusBar } from "expo-status-bar";
 import * as IconsOutline from "react-native-heroicons/outline";
 import { useSQLiteContext } from "expo-sqlite";
+import MenuContainer from "../components/MenuContainer";
+import MenuItem from "../components/MenuItem";
 export default function Home({ navigation }) {
   const [isLoading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -22,13 +24,14 @@ export default function Home({ navigation }) {
   const [isFetched, setFetched] = useState(false);
   const [results, setResults] = useState([]);
   const db = useSQLiteContext();
+  const [menuShown, setMenuShown] = useState(true);
   async function getData() {
     const result = await db.getAllAsync(
-      `SELECT * FROM Downloads ORDER BY ID DESC;`
+      `SELECT * FROM Recent ORDER BY ID DESC;`
     );
     setResults(result);
     setLoading(false);
-    console.log("Data : \n" + JSON.stringify(result, undefined, 2));
+    // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
 
   const fetchBook = async () => {
@@ -56,8 +59,6 @@ export default function Home({ navigation }) {
     db.withTransactionAsync(async () => {
       await getData();
     });
-    setSearchText("java");
-    fetchBook();
   }, []);
 
   return (
@@ -88,14 +89,12 @@ export default function Home({ navigation }) {
           >
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Downloads");
+                setMenuShown(true);
+                // navigation.navigate("Downloads");
               }}
             >
-              <IconsOutline.FolderArrowDownIcon size={28} color={"white"} />
+              <IconsOutline.Bars3Icon size={28} color={"white"} />
             </TouchableOpacity>
-            {/* <TouchableOpacity>
-              <IconsOutline.CogIcon size={31} color={"black"} />
-            </TouchableOpacity> */}
           </View>
         </View>
         <View style={styles.searchbox}>
@@ -119,6 +118,17 @@ export default function Home({ navigation }) {
           V1.0.20
         </Text>
       </View>
+      <MenuContainer shown={menuShown} setShown={setMenuShown}>
+        <MenuItem
+          Icon={() => (
+            <IconsOutline.FolderArrowDownIcon color={"black"} size={28} />
+          )}
+          text="Downloads"
+          action={() => {
+            navigation.navigate("Downloads");
+          }}
+        />
+      </MenuContainer>
       <View>
         {isLoading ? (
           <ActivityIndicator

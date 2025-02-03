@@ -12,7 +12,6 @@ import {
   ActivityIndicator,
   Image,
   Alert,
-  Switch,
 } from "react-native";
 import Pdf from "react-native-pdf";
 import AntDesign from "@expo/vector-icons/AntDesign";
