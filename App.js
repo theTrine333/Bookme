@@ -120,8 +120,6 @@ export default function App() {
           <SQLiteProvider databaseName="bookme.db" useSuspense>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Home" component={Home} />
-              {/* <Stack.Screen name="Startup" component={Startup} /> */}
-              {/* <Stack.Screen name="ScreenTabs" component={Navigation} /> */}
               <Stack.Screen name="Details" component={Details} />
               <Stack.Screen name="Reader" component={Reader} />
               <Stack.Screen name="Downloads" component={Downloads} />

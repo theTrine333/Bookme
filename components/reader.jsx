@@ -17,6 +17,7 @@ import {
 import Pdf from "react-native-pdf";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Foundation from "@expo/vector-icons/Foundation";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { TextInput } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
@@ -184,7 +185,7 @@ export default function Reader({ navigation, route }) {
             <View
               style={[
                 styles.modalSubView,
-                { alignSelf: "center", padding: 10 },
+                { alignSelf: "center", padding: 10, alignItems: "center" },
               ]}
             >
               {horizontalView ? (
@@ -192,22 +193,27 @@ export default function Reader({ navigation, route }) {
               ) : (
                 <Text style={styles.modalText}>Horizontal</Text>
               )}
-              <Switch
-                value={horizontalView}
-                onValueChange={setHorizontalView}
-              />
+              <TouchableOpacity
+                onPress={() => setHorizontalView(!horizontalView)}
+              >
+                {horizontalView ? (
+                  <FontAwesome name="arrows-h" size={24} color="black" />
+                ) : (
+                  <FontAwesome name="arrows-v" size={24} color="black" />
+                )}
+              </TouchableOpacity>
             </View>
 
             <View
               style={[
                 styles.modalSubView,
-                { alignSelf: "center", padding: 10 },
+                { alignSelf: "center", padding: 10, alignItems: "center" },
               ]}
             >
               {pageView ? (
-                <Text style={styles.modalText}> Fit View</Text>
-              ) : (
                 <Text style={styles.modalText}> Fill View</Text>
+              ) : (
+                <Text style={styles.modalText}> Fit View</Text>
               )}
               <TouchableOpacity onPress={() => setPageView(!pageView)}>
                 {pageView ? (
@@ -286,22 +292,16 @@ export default function Reader({ navigation, route }) {
             style={{
               position: "absolute",
               alignSelf: "center",
-              paddingVertical: 15,
-              paddingHorizontal: 15,
-              borderBottomLeftRadius: 8,
-              borderTopRightRadius: 8,
+              height: height * 0.06,
+              width: width * 0.2,
+              borderColor: "grey",
+              elevation: 4,
+              backgroundColor: "white",
+              borderRadius: 8,
               bottom: 20,
-              shadowColor: "#000",
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
               flex: 1,
               gap: 10,
               flexDirection: "row",
-              shadowRadius: 4,
-              elevation: 1,
               justifyContent: "center",
               alignItems: "center",
             }}

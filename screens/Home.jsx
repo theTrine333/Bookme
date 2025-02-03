@@ -24,11 +24,11 @@ export default function Home({ navigation }) {
   const db = useSQLiteContext();
   async function getData() {
     const result = await db.getAllAsync(
-      `SELECT * FROM Recent ORDER BY ID DESC;`
+      `SELECT * FROM Downloads ORDER BY ID DESC;`
     );
     setResults(result);
     setLoading(false);
-    // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
+    console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
 
   const fetchBook = async () => {
