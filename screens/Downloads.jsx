@@ -1,16 +1,29 @@
-import { StyleSheet, Text, View, Image, FlatList } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import DCard from "../components/dcard";
 import { useNavigation } from "@react-navigation/native";
-import {
-  AdEventType,
-  BannerAd,
-  BannerAdSize,
-} from "react-native-google-mobile-ads";
+import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import { height, width } from "../components/bookCard";
 import { downloadPageView } from "../api/api";
+import { useDispatch, useSelector } from "react-redux";
+import { Divider, Menu, PaperProvider } from "react-native-paper";
+import {
+  EllipsisVerticalIcon,
+  FolderOpenIcon,
+  ShareIcon,
+  TrashIcon,
+} from "react-native-heroicons/outline";
+import { clearToBeDeleted } from "../store/slicer";
+
 const Downloads = () => {
   const [results, setResults] = useState({});
   const [isloading, setLoading] = useState(false);
@@ -18,7 +31,10 @@ const Downloads = () => {
   const [adLoaded, setAdLoaded] = useState(false);
   const [shouldShowAd, setShouldShowAd] = useState(true);
   const db = useSQLiteContext();
+  const [menuShown, setMenuShown] = useState(false);
   const navigation = useNavigation();
+  const dispath = useDispatch();
+  const books = useSelector((state) => state.books.books);
 
   async function getData() {
     setLoading(true);
@@ -33,110 +49,171 @@ const Downloads = () => {
   useEffect(() => {
     getData();
   }, []);
-
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      dispath(clearToBeDeleted());
+    });
+    return unsubscribe;
+  }, [navigation]);
   return (
-    <View style={styles.container}>
-      <View style={styles.headerView}>
-        <Image
-          source={require("../assets/icons/0.png")}
-          style={styles.image}
-          resizeMode="contain"
-        />
-        <Text
-          style={{
-            color: "white",
-            textAlign: "center",
-            fontWeight: "bold",
-            fontSize: 28,
-          }}
-        >
-          Downloads
-        </Text>
-      </View>
-      {isloading ? (
-        <ActivityIndicator size="large" color={"rgba(255,140,0,255)"} />
-      ) : error ? (
-        <View>
-          <Text style={{ textAlign: "center", color: "#E3002A" }}>
-            Something went wrong
-          </Text>
-          <Text style={{ textAlign: "center" }}>
-            Can't load recent books at the moment
-          </Text>
-        </View>
-      ) : results.length === 0 ? (
-        <View
-          style={{
-            alignSelf: "center",
-            height: height * 0.4,
-            width: width * 0.9,
-            marginTop: 10,
-            justifyContent: "center",
-            alignContent: "center",
-          }}
-        >
+    <PaperProvider>
+      <View style={styles.container}>
+        <View style={styles.headerView}>
           <Image
-            source={require("../assets/icons/1.png")}
-            style={{
-              height: 60,
-              width: 60,
-              borderRadius: 8,
-              resizeMode: "contain",
-              alignSelf: "center",
-            }}
+            source={require("../assets/icons/0.png")}
+            style={styles.image}
+            resizeMode="contain"
           />
-          <Text
+          <View
             style={{
-              paddingTop: 10,
-              color: "rgba(255,140,0,255)",
-              textAlign: "center",
+              flexDirection: "row",
+              width: width * 0.64,
+              justifyContent: "space-between",
+              marginRight: 20,
+              alignItems: "center",
+              alignSelf: "flex-end",
             }}
           >
-            No downloads yet
-          </Text>
-        </View>
-      ) : (
-        <View
-          style={{
-            alignSelf: "center",
-            maxHeight: height * 0.57,
-            minWidth: width * 0.97,
-            backgroundColor: '"rgb(220,220,220)',
-            borderRadius: 12,
-            paddingTop: 10,
-            marginTop: 10,
-          }}
-        >
-          <FlatList
-            data={results}
-            renderItem={({ item }) => (
-              <DCard
-                bookPoster={item.Poster}
-                Title={item.Title}
-                Description={item.Description}
-                lang={item.Language}
-                size={item.Size}
-                authors={item.Authors}
-                Ext={item.Extension}
-                bookUrl={item.Url}
-                download_server={item.Link}
-                reloadFunction={getData}
-              />
+            <Text
+              style={{
+                color: "white",
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: 28,
+              }}
+            >
+              {books.length === 0 ? "Downloads" : "Selected : " + books.length}
+            </Text>
+            {books.length === 0 ? (
+              <></>
+            ) : (
+              <Menu
+                visible={menuShown}
+                onDismiss={() => {
+                  setMenuShown(false);
+                  // dispath(clearToBeDeleted());
+                }}
+                style={{ paddingTop: 70 }}
+                anchor={
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMenuShown(true);
+                    }}
+                    hitSlop={30}
+                  >
+                    <EllipsisVerticalIcon size={28} color={"white"} />
+                  </TouchableOpacity>
+                }
+              >
+                <Menu.Item
+                  onPress={() => {}}
+                  title="Export"
+                  leadingIcon={() => (
+                    <FolderOpenIcon color={"white"} size={25} />
+                  )}
+                />
+                <Divider />
+                <Menu.Item
+                  onPress={() => {}}
+                  title="Share"
+                  leadingIcon={() => <ShareIcon color={"white"} size={25} />}
+                />
+                <Divider />
+                <Menu.Item
+                  onPress={() => {}}
+                  title="Delete"
+                  leadingIcon={() => <TrashIcon color={"red"} size={25} />}
+                />
+              </Menu>
             )}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{ gap: 10, paddingBottom: 60 }}
-            vertical
-            showsVerticalScrollIndicator={false}
+          </View>
+        </View>
+        {isloading ? (
+          <ActivityIndicator size="large" color={"rgba(255,140,0,255)"} />
+        ) : error ? (
+          <View>
+            <Text style={{ textAlign: "center", color: "#E3002A" }}>
+              Something went wrong
+            </Text>
+            <Text style={{ textAlign: "center" }}>
+              Can't load recent books at the moment
+            </Text>
+          </View>
+        ) : results.length === 0 ? (
+          <View
+            style={{
+              alignSelf: "center",
+              height: height * 0.4,
+              width: width * 0.9,
+              marginTop: 10,
+              justifyContent: "center",
+              alignContent: "center",
+            }}
+          >
+            <Image
+              source={require("../assets/icons/1.png")}
+              style={{
+                height: 60,
+                width: 60,
+                borderRadius: 8,
+                resizeMode: "contain",
+                alignSelf: "center",
+              }}
+            />
+            <Text
+              style={{
+                paddingTop: 10,
+                color: "rgba(255,140,0,255)",
+                textAlign: "center",
+              }}
+            >
+              No downloads yet
+            </Text>
+          </View>
+        ) : (
+          <View
+            style={{
+              alignSelf: "center",
+              maxHeight: height * 0.57,
+              minWidth: width * 0.97,
+              backgroundColor: '"rgb(220,220,220)',
+              borderRadius: 12,
+              paddingTop: 10,
+              marginTop: 10,
+            }}
+          >
+            <FlatList
+              data={results}
+              renderItem={({ item }) => (
+                <DCard
+                  dispatch={dispath}
+                  bookPoster={item.Poster}
+                  Title={item.Title}
+                  Description={item.Description}
+                  lang={item.Language}
+                  size={item.Size}
+                  authors={item.Authors}
+                  Ext={item.Extension}
+                  bookUrl={item.Url}
+                  download_server={item.Link}
+                  reloadFunction={getData}
+                />
+              )}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={{ gap: 10, paddingBottom: 60 }}
+              vertical
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        )}
+        <View style={{ position: "absolute", bottom: 1 }}>
+          <BannerAd
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            unitId="ca-app-pub-5482160285556109/4302126257"
           />
         </View>
-      )}
-      <View style={{ position: "absolute", bottom: 1 }}>
-        <BannerAd
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          unitId="ca-app-pub-5482160285556109/4302126257"
-        />
       </View>
-    </View>
+    </PaperProvider>
   );
 };
 

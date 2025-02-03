@@ -1,43 +1,32 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  library: [],
-  currentBook: null,
-  downloadedBooks: [{}],
-  downloadedCount: 0,
-};
-
-const booksSlice = createSlice({
-  name: "books",
-  initialState,
+const deletesSlicer = createSlice({
+  name: "deletes",
+  initialState: {
+    books: [],
+  },
   reducers: {
-    addBookToLibrary: (state, action) => {
-      state.library.push(action.payload);
+    addToBeDeleted: (state, action) => {
+      const { Poster, bookTitle, bookUrl, Server } = action.payload;
+      state.books.push({
+        Poster: Poster,
+        bookTitle: bookTitle,
+        bookUrl: bookUrl,
+        Server: Server,
+      });
     },
-    setCurrentBook: (state, action) => {
-      state.currentBook = action.payload;
-    },
-    addDownloadedBook: (state, action) => {
-      state.downloadedBooks.push(action.payload);
-      state.downloadedCount += 1;
-    },
-    removeDownloadedBook: (state, action) => {
-      state.downloadedBooks = state.downloadedBooks.filter(
-        (book) => book.id !== action.payload
+    removeFromToBeDeleted: (state, action) => {
+      const { bookUrl, Server } = action.payload;
+      state.books = state.books.filter(
+        (item) => !(item.Server === Server && item.bookUrl === bookUrl)
       );
     },
-    resetDownloadCount: (state) => {
-      state.downloadedCount = 0;
+    clearToBeDeleted: (state, action) => {
+      state.books = [];
     },
   },
 });
 
-export const {
-  addBookToLibrary,
-  setCurrentBook,
-  addDownloadedBook,
-  removeDownloadedBook,
-  resetDownloadCount,
-} = booksSlice.actions;
-
-export const booksReducer = booksSlice.reducer;
+export const { addToBeDeleted, removeFromToBeDeleted, clearToBeDeleted } =
+  deletesSlicer.actions;
+export const booksReducer = deletesSlicer.reducer;

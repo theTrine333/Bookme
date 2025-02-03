@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -18,6 +19,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { Divider, Menu, PaperProvider } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { exportDatabase } from "../api/database";
+import * as Constants from "expo-constants";
 export default function Home({ navigation }) {
   const [isLoading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -32,7 +34,6 @@ export default function Home({ navigation }) {
     );
     setResults(result);
     setLoading(false);
-    // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
 
   const fetchBook = async () => {
@@ -117,7 +118,12 @@ export default function Home({ navigation }) {
                 <Divider />
                 <Menu.Item
                   onPress={() => {
-                    exportDatabase();
+                    exportDatabase().then(() => {
+                      ToastAndroid.show(
+                        "Database successfully exported",
+                        ToastAndroid.SHORT
+                      );
+                    });
                   }}
                   title="Export DB"
                   leadingIcon={() => (
@@ -128,7 +134,6 @@ export default function Home({ navigation }) {
                     />
                   )}
                 />
-
                 <Menu.Item
                   onPress={() => {}}
                   title="Import DB"
@@ -161,7 +166,7 @@ export default function Home({ navigation }) {
               paddingTop: 10,
             }}
           >
-            V1.0.20
+            V{Constants.default.expoConfig.version}
           </Text>
         </View>
         <View>

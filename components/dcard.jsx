@@ -12,7 +12,11 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSQLiteContext } from "expo-sqlite";
 import { height, width } from "./bookCard";
 import * as FileSystem from "expo-file-system";
+import { ImageBackground } from "expo-image";
+import { CheckCircleIcon } from "react-native-heroicons/outline";
+import { addToBeDeleted, removeFromToBeDeleted } from "../store/slicer";
 const DCard = ({
+  dispatch,
   bookUrl,
   Title,
   Description,
@@ -26,6 +30,7 @@ const DCard = ({
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, isLoading] = useState(false);
+  const [selected, setSelected] = useState(false);
   const navigation = useNavigation();
   const db = useSQLiteContext();
 
@@ -38,6 +43,16 @@ const DCard = ({
   return (
     <TouchableOpacity
       onPress={() => {
+        if (selected) {
+          dispatch(
+            removeFromToBeDeleted({
+              bookUrl: bookUrl,
+              Server: download_server,
+            })
+          );
+          setSelected(false);
+          return;
+        }
         navigation.navigate("Reader", {
           Poster: bookPoster || "https://libgen.li/img/blank.png",
           bookTitle: Title,
@@ -51,36 +66,70 @@ const DCard = ({
         });
       }}
       onLongPress={() => {
-        Alert.alert(
-          "Delete invocked",
-          "You have long pressed this item. Do you wish to delete it?",
-          [
-            {
-              text: "Cancel",
-              style: "cancel",
-              onPress: () => {},
-            },
-            {
-              text: "Delete",
-              style: "destructive",
-              onPress: () => {
-                deleteDown();
-              },
-            },
-          ]
-        );
+        if (!selected) {
+          dispatch(
+            addToBeDeleted({
+              Poster: bookPoster || "https://libgen.li/img/blank.png",
+              bookUrl: bookUrl,
+              Server: download_server,
+            })
+          );
+          setSelected(true);
+        }
+
+        // Alert.alert(
+        //   "Delete invocked",
+        //   "You have long pressed this item. Do you wish to delete it?",
+        //   [
+        //     {
+        //       text: "Cancel",
+        //       style: "cancel",
+        //       onPress: () => {},
+        //     },
+        //     {
+        //       text: "Delete",
+        //       style: "destructive",
+        //       onPress: () => {
+        //         deleteDown();
+        //       },
+        //     },
+        //   ]
+        // );
       }}
     >
       <View style={styles.card}>
-        <Image
-          source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
-          style={{
-            height: 100,
-            width: 100,
-            borderRadius: 8,
-            resizeMode: "contain",
-          }}
-        />
+        {selected ? (
+          <ImageBackground
+            source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
+            imageStyle={{
+              height: 100,
+              width: 100,
+              opacity: 0.5,
+              resizeMode: "contain",
+            }}
+            style={{
+              height: 100,
+              width: 100,
+              borderRadius: 10,
+              justifyContent: "center",
+              alignItems: "center",
+              resizeMode: "contain",
+            }}
+          >
+            <CheckCircleIcon color={"black"} size={25} />
+          </ImageBackground>
+        ) : (
+          <Image
+            source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
+            style={{
+              height: 100,
+              width: 100,
+              borderRadius: 8,
+              resizeMode: "contain",
+            }}
+          />
+        )}
+
         <View style={styles.detailsContainer}>
           <Text style={styles.heading} numberOfLines={3}>
             {Title}

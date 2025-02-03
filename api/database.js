@@ -1,44 +1,59 @@
 import * as FileSystem from "expo-file-system";
-import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
 
-const exportDatabase = async () => {
+export const exportDatabase = async () => {
   try {
     const dbName = "bookme.db";
     const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
 
-    // Check if the database file exists
     const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
     if (!fileInfo.exists) {
       console.error("Database does not exist.");
       return;
     }
 
-    // Ask the user to pick a location to store the exported database
-    const pickerResult = await DocumentPicker.getDocumentAsync({
-      type: "*/*", // Allow all file types
-      copyToCacheDirectory: false, // Let the user pick a directory
-    });
+    // Ask the user to select a directory
+    const permissions =
+      await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
-    if (pickerResult.type === "cancel") {
-      console.log("User cancelled the file picker");
+    if (!permissions.granted) {
+      console.log("User denied directory access.");
       return;
     }
 
-    // Get the destination file path
-    const exportPath = pickerResult.uri; // This is the selected path where the user wants to save the file
+    // Get the URI of the selected directory
+    const directoryUri = permissions.directoryUri;
 
-    // Copy the database file to the selected destination
-    await FileSystem.copyAsync({
-      from: dbFilePath,
-      to: exportPath,
+    // Create file in selected directory
+    const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+      directoryUri,
+      dbName,
+      "application/vnd.sqlite3"
+    );
+
+    // Write database content to the created file
+    const dbContent = await FileSystem.readAsStringAsync(dbFilePath, {
+      encoding: FileSystem.EncodingType.Base64,
     });
 
-    console.log("Database exported successfully to:", exportPath);
+    await FileSystem.StorageAccessFramework.writeAsStringAsync(
+      fileUri,
+      dbContent,
+      {
+        encoding: FileSystem.EncodingType.Base64,
+      }
+    );
 
-    // Optionally, use expo-sharing to allow the user to share the file
+    // Copy the file to a shareable local directory
+    const localFilePath = `${FileSystem.cacheDirectory}${dbName}`;
+    await FileSystem.copyAsync({
+      from: fileUri,
+      to: localFilePath,
+    });
+
+    // Offer sharing if supported
     if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(exportPath); // This will open the system's sharing interface
+      await Sharing.shareAsync(localFilePath);
     }
   } catch (error) {
     console.error("Error exporting database:", error);

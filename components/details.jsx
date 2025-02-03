@@ -136,11 +136,10 @@ const Details = ({ navigation, route }) => {
     }
   }
   useEffect(() => {
-    setdownLoading(true);
     const rewardunsubscribeLoaded = rewardedInterstitial.addAdEventListener(
       RewardedAdEventType.LOADED,
       () => {
-        setdownLoading(false);
+        // setdownLoading(false);
       }
     );
     const rewardunsubscribeEarned = rewardedInterstitial.addAdEventListener(
