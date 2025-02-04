@@ -34,10 +34,10 @@ const Downloads = () => {
   const [shouldShowAd, setShouldShowAd] = useState(true);
   const db = useSQLiteContext();
   const [menuShown, setMenuShown] = useState(false);
+  const [snackShown, setSnackShown] = useState(false);
   const navigation = useNavigation();
   const dispath = useDispatch();
   const books = useSelector((state) => state.books.books);
-
   async function getData() {
     setLoading(true);
 
@@ -109,7 +109,7 @@ const Downloads = () => {
               >
                 <Menu.Item
                   onPress={() => {
-                    exportBooks(books, dispath);
+                    setSnackShown(true);
                   }}
                   title="Export"
                   leadingIcon={() => (
@@ -223,11 +223,14 @@ const Downloads = () => {
           </View>
         )}
         <View style={{ position: "absolute", bottom: 1 }}>
-          {/* <BannerAd
-            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-            unitId="ca-app-pub-5482160285556109/4302126257"
-          /> */}
-          <Snackbar />
+          {snackShown ? (
+            <Snackbar setShown={setSnackShown} exports={books} />
+          ) : (
+            <BannerAd
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              unitId="ca-app-pub-5482160285556109/4302126257"
+            />
+          )}
         </View>
       </View>
     </PaperProvider>

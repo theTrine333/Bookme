@@ -2,7 +2,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Alert, ToastAndroid } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { clearToBeDeleted } from "../store/slicer";
+import { addToBeExported, clearToBeDeleted } from "../store/slicer";
 
 export const exportDatabase = async () => {
   try {
@@ -72,18 +72,15 @@ export const shareBooks = async (books, dispatch) => {
   }
 };
 export const exportBooks = async (books, dispatch) => {
-  const permissions =
-    await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-
-  if (!permissions.granted) {
-    // Alert.alert("Error", "User didn't grant storage permissions");
-    dispatch(clearToBeDeleted());
-    return;
-  }
-
-  // Get the URI of the selected directory
-  const directoryUri = permissions.directoryUri;
-
+  // const permissions =
+  //   await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+  // if (!permissions.granted) {
+  //   // Alert.alert("Error", "User didn't grant storage permissions");
+  //   dispatch(clearToBeDeleted());
+  //   return;
+  // }
+  // // Get the URI of the selected directory
+  // const directoryUri = permissions.directoryUri;
   books?.forEach(async (element) => {
     const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
       directoryUri,
@@ -93,7 +90,6 @@ export const exportBooks = async (books, dispatch) => {
     const dbContent = await FileSystem.readAsStringAsync(element.bookUrl, {
       encoding: FileSystem.EncodingType.Base64,
     });
-
     await FileSystem.StorageAccessFramework.writeAsStringAsync(
       fileUri,
       dbContent,
@@ -102,17 +98,9 @@ export const exportBooks = async (books, dispatch) => {
       }
     );
   });
-  ToastAndroid.showWithGravityAndOffset(
-    "Your files were exported successfully!",
-    ToastAndroid.LONG,
-    ToastAndroid.BOTTOM,
-    25,
-    50
-  );
-  dispatch(clearToBeDeleted());
 };
 
-function extractFileNameFromUrl(url) {
+export function extractFileNameFromUrl(url) {
   try {
     const fileUrl = new URL(url);
     const filePath = fileUrl.pathname;
@@ -122,6 +110,19 @@ function extractFileNameFromUrl(url) {
     console.error("Invalid URL:", error);
     return null;
   }
+}
+export function formatFileSize(bytes, decimals = 2) {
+  if (bytes === 0) return "0 Bytes"; // Handle zero bytes case
+
+  const k = 1024; // Factor for kilobytes
+  const dm = decimals < 0 ? 0 : decimals; // Ensure decimals is non-negative
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]; // Units
+
+  // Determine the appropriate unit based on the size of the file
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  // Calculate the formatted size and append the unit
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 export function isInJsonArray(data, targetBookUrl) {
   return data.some((item) => item.bookUrl === targetBookUrl);
