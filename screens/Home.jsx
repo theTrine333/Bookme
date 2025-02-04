@@ -145,6 +145,15 @@ export default function Home({ navigation }) {
                     />
                   )}
                 />
+                {/* <Divider />
+                <Menu.Item
+                  onPress={() => {}}
+                  title="Buy Pro"
+                  titleStyle={{ color: "#f7d001" }}
+                  leadingIcon={() => (
+                    <IconsOutline.SparklesIcon size={26} color={"#f7d001"} />
+                  )}
+                /> */}
               </Menu>
             </View>
           </View>

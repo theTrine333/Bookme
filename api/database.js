@@ -1,5 +1,8 @@
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { Alert, ToastAndroid } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { clearToBeDeleted } from "../store/slicer";
 
 export const exportDatabase = async () => {
   try {
@@ -8,16 +11,15 @@ export const exportDatabase = async () => {
 
     const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
     if (!fileInfo.exists) {
-      console.error("Database does not exist.");
+      Alert.alert("Error", "No database to be exported");
       return;
     }
 
-    // Ask the user to select a directory
     const permissions =
       await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
     if (!permissions.granted) {
-      console.log("User denied directory access.");
+      Alert.alert("Error", "User didn't grant storage permissions");
       return;
     }
 
@@ -56,6 +58,75 @@ export const exportDatabase = async () => {
       await Sharing.shareAsync(localFilePath);
     }
   } catch (error) {
-    console.error("Error exporting database:", error);
+    Alert.alert("Error exporting database:", error);
   }
 };
+
+export const shareBooks = async (books, dispatch) => {
+  if (await Sharing.isAvailableAsync()) {
+    books.forEach(async (element) => {
+      try {
+        await Sharing.shareAsync(element.bookUrl);
+      } catch {}
+    });
+  }
+
+  dispatch(clearToBeDeleted());
+};
+export const exportBooks = async (books, dispatch) => {
+  const permissions =
+    await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+  if (!permissions.granted) {
+    // Alert.alert("Error", "User didn't grant storage permissions");
+    dispatch(clearToBeDeleted());
+    return;
+  }
+
+  // Get the URI of the selected directory
+  const directoryUri = permissions.directoryUri;
+
+  books?.forEach(async (element) => {
+    const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+      directoryUri,
+      extractFileNameFromUrl(element.bookUrl),
+      "application/pdf"
+    );
+    const dbContent = await FileSystem.readAsStringAsync(element.bookUrl, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    await FileSystem.StorageAccessFramework.writeAsStringAsync(
+      fileUri,
+      dbContent,
+      {
+        encoding: FileSystem.EncodingType.Base64,
+      }
+    );
+  });
+  ToastAndroid.showWithGravityAndOffset(
+    "Your files were exported successfully!",
+    ToastAndroid.LONG,
+    ToastAndroid.BOTTOM,
+    25,
+    50
+  );
+  dispatch(clearToBeDeleted());
+};
+
+function extractFileNameFromUrl(url) {
+  try {
+    const fileUrl = new URL(url);
+    // Get the pathname (everything after the host)
+    const filePath = fileUrl.pathname;
+
+    // Split the path by '/' and take the last part, which is the file name
+    const fileName = filePath.split("/").pop();
+
+    return fileName;
+  } catch (error) {
+    // Handle invalid URLs or other errors
+    console.error("Invalid URL:", error);
+    return null;
+  }
+}

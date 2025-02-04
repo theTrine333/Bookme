@@ -144,7 +144,6 @@ export default function Reader({ navigation, route }) {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-
                   width: 80,
                   backgroundColor: "lightgrey",
                 }}
@@ -181,48 +180,48 @@ export default function Reader({ navigation, route }) {
               </View>
             </View>
 
-            <View
+            <TouchableOpacity
               style={[
                 styles.modalSubView,
                 { alignSelf: "center", padding: 10, alignItems: "center" },
               ]}
+              onPress={() => setHorizontalView(!horizontalView)}
             >
               {horizontalView ? (
                 <Text style={styles.modalText}>Vertical</Text>
               ) : (
                 <Text style={styles.modalText}>Horizontal</Text>
               )}
-              <TouchableOpacity
-                onPress={() => setHorizontalView(!horizontalView)}
-              >
+              <View>
                 {horizontalView ? (
                   <FontAwesome name="arrows-h" size={24} color="black" />
                 ) : (
                   <FontAwesome name="arrows-v" size={24} color="black" />
                 )}
-              </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableOpacity>
 
-            <View
+            <TouchableOpacity
               style={[
                 styles.modalSubView,
                 { alignSelf: "center", padding: 10, alignItems: "center" },
               ]}
+              onPress={() => setPageView(!pageView)}
             >
               {pageView ? (
                 <Text style={styles.modalText}> Fill View</Text>
               ) : (
                 <Text style={styles.modalText}> Fit View</Text>
               )}
-              <TouchableOpacity onPress={() => setPageView(!pageView)}>
+              <View>
                 {pageView ? (
                   <Foundation name="arrows-out" size={24} color="black" />
                 ) : (
                   <Foundation name="arrows-in" size={24} color="black" />
                 )}
-              </TouchableOpacity>
+              </View>
               {/* <Switch value={pageView} onValueChange={setPageView} /> */}
-            </View>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.modalSubView,
@@ -292,7 +291,7 @@ export default function Reader({ navigation, route }) {
               position: "absolute",
               alignSelf: "center",
               height: height * 0.06,
-              width: width * 0.2,
+              width: width * 0.25,
               borderColor: "grey",
               elevation: 4,
               backgroundColor: "white",

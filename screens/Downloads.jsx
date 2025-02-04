@@ -23,6 +23,7 @@ import {
   TrashIcon,
 } from "react-native-heroicons/outline";
 import { clearToBeDeleted } from "../store/slicer";
+import { exportBooks, shareBooks } from "../api/database";
 
 const Downloads = () => {
   const [results, setResults] = useState({});
@@ -106,7 +107,9 @@ const Downloads = () => {
                 }
               >
                 <Menu.Item
-                  onPress={() => {}}
+                  onPress={() => {
+                    exportBooks(books, dispath);
+                  }}
                   title="Export"
                   leadingIcon={() => (
                     <FolderOpenIcon color={"white"} size={25} />
@@ -114,7 +117,9 @@ const Downloads = () => {
                 />
                 <Divider />
                 <Menu.Item
-                  onPress={() => {}}
+                  onPress={() => {
+                    shareBooks(books, dispath);
+                  }}
                   title="Share"
                   leadingIcon={() => <ShareIcon color={"white"} size={25} />}
                 />
