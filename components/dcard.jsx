@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSQLiteContext } from "expo-sqlite";
@@ -15,6 +15,7 @@ import * as FileSystem from "expo-file-system";
 import { ImageBackground } from "expo-image";
 import Feather from "@expo/vector-icons/Feather";
 import { addToBeDeleted, removeFromToBeDeleted } from "../store/slicer";
+import { isInJsonArray } from "../api/database";
 const DCard = ({
   dispatch,
   selector,
@@ -35,6 +36,9 @@ const DCard = ({
   const navigation = useNavigation();
   const db = useSQLiteContext();
   const books = selector((state) => state.books.books);
+  useEffect(() => {
+    setSelected(isInJsonArray(books, bookUrl));
+  }, [books]);
   async function deleteDown() {
     await db.runAsync(`DELETE FROM Downloads where Link=$Link`, {
       $Link: `${download_server}`,

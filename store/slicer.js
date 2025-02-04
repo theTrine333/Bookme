@@ -8,10 +8,9 @@ const deletesSlicer = createSlice({
   },
   reducers: {
     addToBeDeleted: (state, action) => {
-      const { Poster, bookTitle, bookUrl, Server } = action.payload;
+      const { Poster, bookUrl, Server } = action.payload;
       state.books.push({
         Poster: Poster,
-        bookTitle: bookTitle,
         bookUrl: bookUrl,
         Server: Server,
       });

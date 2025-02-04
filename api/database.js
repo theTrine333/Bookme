@@ -115,16 +115,14 @@ export const exportBooks = async (books, dispatch) => {
 function extractFileNameFromUrl(url) {
   try {
     const fileUrl = new URL(url);
-    // Get the pathname (everything after the host)
     const filePath = fileUrl.pathname;
-
-    // Split the path by '/' and take the last part, which is the file name
     const fileName = filePath.split("/").pop();
-
     return fileName;
   } catch (error) {
-    // Handle invalid URLs or other errors
     console.error("Invalid URL:", error);
     return null;
   }
+}
+export function isInJsonArray(data, targetBookUrl) {
+  return data.some((item) => item.bookUrl === targetBookUrl);
 }
