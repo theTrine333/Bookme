@@ -1,10 +1,15 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { height, width } from "./bookCard";
 import { Pie } from "react-native-progress";
 import { useDispatch, useSelector } from "react-redux";
 import * as FileSystem from "expo-file-system";
-import { extractFileNameFromUrl, formatFileSize } from "../api/database";
+import {
+  extractFileNameFromUrl,
+  formatFileSize,
+  readFileInChunks,
+  writeChunksToFile,
+} from "../api/database";
 
 async function getFileSize(filePath) {
   try {
@@ -21,70 +26,84 @@ async function getFileSize(filePath) {
 
 const Snackbar = ({ setShown, exports }) => {
   const dispatch = useDispatch();
+  const [snackState, setSnackState] = useState();
   let totalSize = 0;
   const [totalFilesSizes, setTotalFileSizes] = useState(totalSize);
-  const [downlaodProgress, setDownloadProgress] = useState(0);
   const exportBooks = async () => {
-    try {
-      // Request storage permissions
-      const permissions =
-        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-      if (!permissions.granted) {
-        console.log("User did not grant storage permissions");
-        return;
-      }
-      const downloadsPath = permissions.directoryUri; // Directory URI for storage
-      const existingFiles =
-        await FileSystem.StorageAccessFramework.readDirectoryAsync(
-          downloadsPath
+    const permissions =
+      await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+    if (!permissions.granted) {
+      console.log("User didn't grant permissions");
+      return;
+    }
+
+    // Define a smaller chunk size (e.g., 5MB)
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk
+
+    // Function to read and write files in chunks
+    const processFileInChunks = async (sourceUri, destinationUri) => {
+      const fileInfo = await FileSystem.getInfoAsync(sourceUri);
+      const fileSize = fileInfo.size;
+
+      let offset = 0;
+      const totalChunks = Math.ceil(fileSize / CHUNK_SIZE);
+
+      // Loop to read and write chunks until the entire file is processed
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        // Read the file as binary data (instead of base64) using a raw binary string
+        const chunk = await FileSystem.readAsStringAsync(sourceUri, {
+          encoding: FileSystem.EncodingType.Base64, // Keep base64 encoding for PDF files
+          length: CHUNK_SIZE,
+          position: offset,
+        });
+
+        offset += CHUNK_SIZE; // Move the offset forward for the next chunk
+
+        // Write the chunk to the destination (append if it's not the first chunk)
+        await FileSystem.StorageAccessFramework.writeAsStringAsync(
+          destinationUri,
+          chunk,
+          { encoding: FileSystem.EncodingType.Base64, append: chunkIndex > 0 }
         );
-      exports.forEach(async (book) => {
-        try {
-          const title = extractFileNameFromUrl(book.bookUrl);
-          const filePath = `${downloadsPath}/${title}`;
 
-          // Check if the file already exists
-          if (existingFiles.includes(filePath)) {
-            console.log(`Download skipped: ${title} already exists.`);
-            return;
-          }
+        // Optionally, provide progress feedback
+        const progress = Math.round((offset / fileSize) * 100);
+        console.log(`Progress: ${progress}%`);
+        // Alert.alert("Export Progress", `Processing: ${progress}%`);
+      }
 
-          // Start the download
-          const downloadResumable = FileSystem.createDownloadResumable(
-            book.bookUrl,
-            FileSystem.documentDirectory + title, // Temporary storage
-            {},
-            (downloadProgress) => {
-              const progressPercentage =
-                downloadProgress.totalBytesWritten /
-                downloadProgress.totalBytesExpectedToWrite;
-              console.log("Progress: ", progressPercentage);
-            }
+      console.log("File processing complete.");
+    };
+
+    // Iterate over the exports and process each file
+    exports.forEach(async (element) => {
+      const sourceUri = element.bookUrl;
+      const destinationFolder = permissions.directoryUri;
+      const fileName = extractFileNameFromUrl(element.bookUrl);
+
+      try {
+        // Create a new file in the destination folder
+        const destinationUri =
+          await FileSystem.StorageAccessFramework.createFileAsync(
+            destinationFolder,
+            fileName,
+            "application/pdf"
           );
 
-          // Download the file
-          const { uri } = await downloadResumable.downloadAsync();
+        // Process the file in chunks and write it to the destination
+        await processFileInChunks(sourceUri, destinationUri);
 
-          // Move the file to the selected directory
-          await FileSystem.StorageAccessFramework.createFileAsync(
-            downloadsPath,
-            title,
-            "application/pdf"
-          ).then(async (uri) => {
-            await FileSystem.copyAsync({
-              from: uri,
-              to: uri,
-            });
-            console.log(`File saved to: ${uri}`);
-          });
-        } catch (error) {
-          console.error("Error downloading file:", error);
-        }
-      });
-    } catch (error) {
-      console.error("Error accessing storage:", error);
-    }
+        Alert.alert("Done", `File ${fileName} successfully exported.`);
+      } catch (e) {
+        console.info(
+          "Error",
+          `Error exporting file ${element.bookUrl}: ${e.message}`
+        );
+        Alert.alert("Error", `Error exporting file: ${e.message}`);
+      }
+    });
   };
+
   useEffect(() => {
     exportBooks();
   }, []);

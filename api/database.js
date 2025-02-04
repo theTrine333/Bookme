@@ -127,3 +127,34 @@ export function formatFileSize(bytes, decimals = 2) {
 export function isInJsonArray(data, targetBookUrl) {
   return data.some((item) => item.bookUrl === targetBookUrl);
 }
+export const readFileInChunks = async (
+  fileUri,
+  chunkSize = 5 * 1024 * 1024
+) => {
+  const fileInfo = await FileSystem.getInfoAsync(fileUri);
+  const fileLength = fileInfo.size;
+  let offset = 0;
+  const chunks = [];
+
+  while (offset < fileLength) {
+    const chunk = await FileSystem.readAsStringAsync(fileUri, {
+      encoding: FileSystem.EncodingType.Base64,
+      length: chunkSize,
+      position: offset,
+    });
+    chunks.push(chunk);
+    offset += chunkSize;
+  }
+
+  return chunks;
+};
+
+export const writeChunksToFile = async (fileUri, chunks) => {
+  for (let i = 0; i < chunks.length; i++) {
+    await FileSystem.StorageAccessFramework.writeAsStringAsync(
+      fileUri,
+      chunks[i],
+      { encoding: FileSystem.EncodingType.Base64, append: i > 0 }
+    );
+  }
+};

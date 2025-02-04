@@ -135,6 +135,7 @@ const Details = ({ navigation, route }) => {
       console.error("Error downloading file:", error);
     }
   }
+
   useEffect(() => {
     const rewardunsubscribeLoaded = rewardedInterstitial.addAdEventListener(
       RewardedAdEventType.LOADED,
