@@ -70,8 +70,6 @@ export const shareBooks = async (books, dispatch) => {
       } catch {}
     });
   }
-
-  dispatch(clearToBeDeleted());
 };
 export const exportBooks = async (books, dispatch) => {
   const permissions =

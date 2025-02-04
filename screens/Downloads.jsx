@@ -24,6 +24,7 @@ import {
 } from "react-native-heroicons/outline";
 import { clearToBeDeleted } from "../store/slicer";
 import { exportBooks, shareBooks } from "../api/database";
+import Snackbar from "../components/Snackbar";
 
 const Downloads = () => {
   const [results, setResults] = useState({});
@@ -118,10 +119,19 @@ const Downloads = () => {
                 <Divider />
                 <Menu.Item
                   onPress={() => {
+                    if (books.length > 1) {
+                      return;
+                    }
                     shareBooks(books, dispath);
                   }}
                   title="Share"
-                  leadingIcon={() => <ShareIcon color={"white"} size={25} />}
+                  titleStyle={{ color: books.length > 1 ? "grey" : "white" }}
+                  leadingIcon={() => (
+                    <ShareIcon
+                      color={books.length > 1 ? "grey" : "white"}
+                      size={25}
+                    />
+                  )}
                 />
                 <Divider />
                 <Menu.Item
@@ -192,6 +202,7 @@ const Downloads = () => {
               renderItem={({ item }) => (
                 <DCard
                   dispatch={dispath}
+                  selector={useSelector}
                   bookPoster={item.Poster}
                   Title={item.Title}
                   Description={item.Description}
@@ -212,10 +223,11 @@ const Downloads = () => {
           </View>
         )}
         <View style={{ position: "absolute", bottom: 1 }}>
-          <BannerAd
+          {/* <BannerAd
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
             unitId="ca-app-pub-5482160285556109/4302126257"
-          />
+          /> */}
+          <Snackbar />
         </View>
       </View>
     </PaperProvider>

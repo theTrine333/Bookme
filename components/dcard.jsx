@@ -13,10 +13,11 @@ import { useSQLiteContext } from "expo-sqlite";
 import { height, width } from "./bookCard";
 import * as FileSystem from "expo-file-system";
 import { ImageBackground } from "expo-image";
-import { CheckCircleIcon } from "react-native-heroicons/outline";
+import Feather from "@expo/vector-icons/Feather";
 import { addToBeDeleted, removeFromToBeDeleted } from "../store/slicer";
 const DCard = ({
   dispatch,
+  selector,
   bookUrl,
   Title,
   Description,
@@ -33,7 +34,7 @@ const DCard = ({
   const [selected, setSelected] = useState(false);
   const navigation = useNavigation();
   const db = useSQLiteContext();
-
+  const books = selector((state) => state.books.books);
   async function deleteDown() {
     await db.runAsync(`DELETE FROM Downloads where Link=$Link`, {
       $Link: `${download_server}`,
@@ -51,6 +52,16 @@ const DCard = ({
             })
           );
           setSelected(false);
+          return;
+        } else if (!selected && books.length > 0) {
+          setSelected(true);
+          dispatch(
+            addToBeDeleted({
+              Poster: bookPoster || "https://libgen.li/img/blank.png",
+              bookUrl: bookUrl,
+              Server: download_server,
+            })
+          );
           return;
         }
         navigation.navigate("Reader", {
@@ -76,60 +87,19 @@ const DCard = ({
           );
           setSelected(true);
         }
-
-        // Alert.alert(
-        //   "Delete invocked",
-        //   "You have long pressed this item. Do you wish to delete it?",
-        //   [
-        //     {
-        //       text: "Cancel",
-        //       style: "cancel",
-        //       onPress: () => {},
-        //     },
-        //     {
-        //       text: "Delete",
-        //       style: "destructive",
-        //       onPress: () => {
-        //         deleteDown();
-        //       },
-        //     },
-        //   ]
-        // );
       }}
     >
       <View style={styles.card}>
-        {selected ? (
-          <ImageBackground
-            source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
-            imageStyle={{
-              height: 100,
-              width: 100,
-              opacity: 0.5,
-              resizeMode: "contain",
-            }}
-            style={{
-              height: 100,
-              width: 100,
-              borderRadius: 10,
-              justifyContent: "center",
-              alignItems: "center",
-              resizeMode: "contain",
-            }}
-          >
-            <CheckCircleIcon color={"black"} size={25} />
-          </ImageBackground>
-        ) : (
-          <Image
-            source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
-            style={{
-              height: 100,
-              width: 100,
-              borderRadius: 8,
-              resizeMode: "contain",
-            }}
-          />
-        )}
-
+        <Image
+          source={{ uri: bookPoster || "https://libgen.li/img/blank.png" }}
+          style={{
+            height: 100,
+            width: 100,
+            borderRadius: 8,
+            opacity: selected ? 0.5 : 1,
+            resizeMode: "contain",
+          }}
+        />
         <View style={styles.detailsContainer}>
           <Text style={styles.heading} numberOfLines={3}>
             {Title}
@@ -146,6 +116,23 @@ const DCard = ({
             Language : {lang} | Size : {size} | {Ext} |{" "}
           </Text>
         </View>
+        {selected ? (
+          <Feather
+            name="check-square"
+            size={20}
+            color="#FF5722"
+            style={styles.checkIcon}
+          />
+        ) : books.length > 0 ? (
+          <Feather
+            name="square"
+            size={20}
+            color="grey"
+            style={styles.checkIcon}
+          />
+        ) : (
+          <></>
+        )}
       </View>
       <View
         style={{
@@ -167,6 +154,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     flexDirection: "row",
+    width: width * 0.98,
   },
   heading: {
     fontWeight: "bold",
@@ -178,6 +166,7 @@ const styles = StyleSheet.create({
     gap: 5,
     alignContent: "flex-start",
     justifyContent: "flex-start",
-    width: width * 0.68,
+    width: width * 0.6,
   },
+  checkIcon: { alignSelf: "center" },
 });
