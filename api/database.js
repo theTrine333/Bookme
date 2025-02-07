@@ -1,9 +1,9 @@
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { Alert, ToastAndroid } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { Alert } from "react-native";
 import { addToBeExported, clearToBeDeleted } from "../store/slicer";
-
+import * as Picker from "expo-document-picker";
+import * as SQlite from "expo-sqlite";
 export const exportDatabase = async () => {
   try {
     const dbName = "bookme.db";
@@ -59,6 +59,62 @@ export const exportDatabase = async () => {
     }
   } catch (error) {
     Alert.alert("Error exporting database:", error);
+  }
+};
+
+export const importDatabase = async () => {
+  try {
+    const file = await Picker.getDocumentAsync({
+      multiple: false,
+      copyToCacheDirectory: false,
+      type: "*/*",
+    });
+
+    if (!file?.assets[0]?.name.endsWith(".db")) {
+      Alert.alert(
+        "Import error",
+        'The file selected is not a database file, Make sure your file\'s extension is ".db"'
+      );
+      return;
+    }
+
+    return file?.assets[0]?.uri;
+  } catch (e) {
+    Alert.alert(
+      "Import error",
+      "Some unkown error occured while importing database file"
+    );
+  }
+};
+
+export const addImportedData = async ({ filePath, db }) => {
+  try {
+    const base64 = await FileSystem.readAsStringAsync(filePath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    await FileSystem.writeAsStringAsync(
+      FileSystem.documentDirectory + "SQLite/import.db",
+      base64,
+      { encoding: FileSystem.EncodingType.Base64 }
+    );
+    // Open the database connection
+    const connection = await SQlite.openDatabaseAsync("import.db");
+    const downloads = await connection.getAllAsync("SELECT * FROM Downloads;");
+    const recent = await connection.getAllAsync("SELECT * FROM Recent;");
+    const reads = await connection.getAllAsync("SELECT * FROM Reads;");
+
+    console.log(JSON.stringify(recent, undefined, 2));
+    await connection.closeAsync();
+    // Dispose the imported database
+    await FileSystem.deleteAsync(
+      FileSystem.documentDirectory + "SQLite/import.db"
+    );
+    const tempt = await db.getAllAsync("SELECT * FROM Recent");
+
+    console.log(JSON.stringify(tempt, undefined, 2));
+  } catch (e) {
+    console.log("An error occurred: ", e);
   }
 };
 

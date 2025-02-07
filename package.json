@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@dhairyasharma/react-native-encryption": "^1.0.0",
     "@react-native-menu/menu": "^1.2.2",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",

@@ -18,8 +18,13 @@ import * as IconsOutline from "react-native-heroicons/outline";
 import { useSQLiteContext } from "expo-sqlite";
 import { Divider, Menu, PaperProvider } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { exportDatabase } from "../api/database";
+import {
+  addImportedData,
+  exportDatabase,
+  importDatabase,
+} from "../api/database";
 import * as Constants from "expo-constants";
+import * as Sqlite from "expo-sqlite";
 export default function Home({ navigation }) {
   const [isLoading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -27,6 +32,7 @@ export default function Home({ navigation }) {
   const [isFetched, setFetched] = useState(false);
   const [results, setResults] = useState([]);
   const db = useSQLiteContext();
+
   const [menuShown, setMenuShown] = useState(false);
   async function getData() {
     const result = await db.getAllAsync(
@@ -135,7 +141,11 @@ export default function Home({ navigation }) {
                   )}
                 />
                 <Menu.Item
-                  onPress={() => {}}
+                  onPress={() => {
+                    importDatabase().then((e) => {
+                      addImportedData({ filePath: e, db: db });
+                    });
+                  }}
                   title="Import DB"
                   leadingIcon={() => (
                     <MaterialCommunityIcons

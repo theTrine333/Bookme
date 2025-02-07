@@ -27,6 +27,7 @@ async function getFileSize(filePath) {
 const Snackbar = ({ setShown, exports }) => {
   const dispatch = useDispatch();
   const [snackState, setSnackState] = useState();
+  const [exportName, setExportName] = useState("");
   let totalSize = 0;
   const [totalFilesSizes, setTotalFileSizes] = useState(totalSize);
   const exportBooks = async () => {
@@ -36,11 +37,7 @@ const Snackbar = ({ setShown, exports }) => {
       console.log("User didn't grant permissions");
       return;
     }
-
-    // Define a smaller chunk size (e.g., 5MB)
-    const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk
-
-    // Function to read and write files in chunks
+    const CHUNK_SIZE = 10 * 1024 * 1024;
     const processFileInChunks = async (sourceUri, destinationUri) => {
       const fileInfo = await FileSystem.getInfoAsync(sourceUri);
       const fileSize = fileInfo.size;
@@ -48,7 +45,6 @@ const Snackbar = ({ setShown, exports }) => {
       let offset = 0;
       const totalChunks = Math.ceil(fileSize / CHUNK_SIZE);
 
-      // Loop to read and write chunks until the entire file is processed
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
         // Read the file as binary data (instead of base64) using a raw binary string
         const chunk = await FileSystem.readAsStringAsync(sourceUri, {
@@ -57,19 +53,16 @@ const Snackbar = ({ setShown, exports }) => {
           position: offset,
         });
 
-        offset += CHUNK_SIZE; // Move the offset forward for the next chunk
+        offset += CHUNK_SIZE;
 
-        // Write the chunk to the destination (append if it's not the first chunk)
         await FileSystem.StorageAccessFramework.writeAsStringAsync(
           destinationUri,
           chunk,
           { encoding: FileSystem.EncodingType.Base64, append: chunkIndex > 0 }
         );
 
-        // Optionally, provide progress feedback
         const progress = Math.round((offset / fileSize) * 100);
         console.log(`Progress: ${progress}%`);
-        // Alert.alert("Export Progress", `Processing: ${progress}%`);
       }
 
       console.log("File processing complete.");
@@ -78,11 +71,11 @@ const Snackbar = ({ setShown, exports }) => {
     // Iterate over the exports and process each file
     exports.forEach(async (element) => {
       const sourceUri = element.bookUrl;
+      setExportName(extractFileNameFromUrl(sourceUri));
       const destinationFolder = permissions.directoryUri;
       const fileName = extractFileNameFromUrl(element.bookUrl);
 
       try {
-        // Create a new file in the destination folder
         const destinationUri =
           await FileSystem.StorageAccessFramework.createFileAsync(
             destinationFolder,
@@ -107,6 +100,7 @@ const Snackbar = ({ setShown, exports }) => {
   useEffect(() => {
     exportBooks();
   }, []);
+
   useEffect(() => {
     if (exports.length === 0) {
       setShown(false);
@@ -129,7 +123,7 @@ const Snackbar = ({ setShown, exports }) => {
           Exporting...{formatFileSize(totalFilesSizes)}
         </Text>
         <Text style={styles.snackBodyText} numberOfLines={1}>
-          Java Programming
+          {exportName}
         </Text>
       </View>
       <Pie
