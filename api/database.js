@@ -104,15 +104,68 @@ export const addImportedData = async ({ filePath, db }) => {
     const recent = await connection.getAllAsync("SELECT * FROM Recent;");
     const reads = await connection.getAllAsync("SELECT * FROM Reads;");
 
-    console.log(JSON.stringify(recent, undefined, 2));
     await connection.closeAsync();
     // Dispose the imported database
     await FileSystem.deleteAsync(
       FileSystem.documentDirectory + "SQLite/import.db"
     );
-    const tempt = await db.getAllAsync("SELECT * FROM Recent");
+    // Begin data entry
+    // Enter to downloads
+    downloads.forEach(async (dt) => {
+      await db.runAsync(
+        "INSERT INTO Downloads(Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?)",
+        [
+          dt.Title,
+          dt.Authors,
+          dt.Description,
+          dt.Poster,
+          dt.Language,
+          dt.Size,
+          dt.Url,
+          dt.Link,
+          dt.Extension,
+        ]
+      );
+    });
 
-    console.log(JSON.stringify(tempt, undefined, 2));
+    // Enter to recents
+    recent.forEach(async (dt) => {
+      await db.runAsync(
+        "INSERT INTO Recent(Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?)",
+        [
+          dt.Title,
+          dt.Authors,
+          dt.Description,
+          dt.Poster,
+          dt.Language,
+          dt.Size,
+          dt.Url,
+          dt.Link,
+          dt.Extension,
+        ]
+      );
+    });
+
+    // Enter to reads
+    reads.forEach(async (dt) => {
+      await db.runAsync(
+        "INSERT INTO Reads(Title,Authors,Description,Poster,Language,Size,Url,Link,Extension) VALUES (?,?,?,?,?,?,?,?,?)",
+        [
+          dt.Title,
+          dt.Authors,
+          dt.Description,
+          dt.Poster,
+          dt.Language,
+          dt.Size,
+          dt.Url,
+          dt.Link,
+          dt.Extension,
+        ]
+      );
+    });
+
+    Alert.alert("Success", "You data was successfully imported");
+    return;
   } catch (e) {
     console.log("An error occurred: ", e);
   }
