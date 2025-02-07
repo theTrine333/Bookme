@@ -36,9 +36,19 @@ const DCard = ({
   const navigation = useNavigation();
   const db = useSQLiteContext();
   const books = selector((state) => state.books.books);
+  const [progress, setProgress] = useState(0);
   useEffect(() => {
     setSelected(isInJsonArray(books, bookUrl));
   }, [books]);
+
+  // Check if file was exists downloaded
+
+  const checkBook = async () => {
+    const fileName = `${Title}`.replace(" ", "_");
+  };
+
+  useEffect(() => {});
+
   async function deleteDown() {
     await db.runAsync(`DELETE FROM Downloads where Link=$Link`, {
       $Link: `${download_server}`,

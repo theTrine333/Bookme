@@ -48,6 +48,27 @@ const Downloads = () => {
     setLoading(false);
     // console.log("Data : \n" + JSON.stringify(result, undefined, 2));
   }
+
+  const [showAlert, setShowAlert] = useState(false);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    await books.forEach(async (element) => {
+      await db.runAsync(`DELETE FROM Downloads where Link=$Link`, {
+        $Link: `${element.Server}`,
+      });
+      await FileSystem.deleteAsync(`${element.bookUrl}`);
+    });
+    dispath(clearToBeDeleted());
+    await getData();
+    setShowAlert(false);
+    // Close alert after deletion
+  };
+
+  const handleCancel = () => {
+    dispath(clearToBeDeleted());
+    setShowAlert(false); // Close alert if user cancels
+  };
   useEffect(() => {
     getData();
   }, []);
@@ -135,7 +156,9 @@ const Downloads = () => {
                 />
                 <Divider />
                 <Menu.Item
-                  onPress={() => {}}
+                  onPress={() => {
+                    setShowAlert(true);
+                  }}
                   title="Delete"
                   leadingIcon={() => <TrashIcon color={"red"} size={25} />}
                 />
@@ -222,6 +245,30 @@ const Downloads = () => {
             />
           </View>
         )}
+        {showAlert && (
+          <View style={styles.alertContainer}>
+            <View style={styles.alertBox}>
+              <Text style={styles.alertTitle}>
+                Are you sure you want to delete this items?
+              </Text>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={handleCancel}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.deleteButton]}
+                  onPress={handleDelete}
+                >
+                  <Text style={styles.buttonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
         <View style={{ position: "absolute", bottom: 1 }}>
           {snackShown ? (
             <Snackbar setShown={setSnackShown} exports={books} />
@@ -284,5 +331,66 @@ const styles = StyleSheet.create({
     paddingRight: 40,
     backgroundColor: "rgb(255,130,0)",
     borderRadius: 10,
+  },
+  deleteButton: {
+    padding: 10,
+    backgroundColor: "#FF3B30",
+    borderRadius: 8,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  alertContainer: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Overlay to dim background
+  },
+  alertBox: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    width: 300,
+    maxWidth: "80%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5, // Elevation for Android shadow effect
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: "500",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#333",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  button: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "45%",
+  },
+  cancelButton: {
+    backgroundColor: "#e0e0e0",
+  },
+  deleteButton: {
+    backgroundColor: "#FF3B30",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "500",
   },
 });

@@ -79,12 +79,7 @@ export const importDatabase = async () => {
     }
 
     return file?.assets[0]?.uri;
-  } catch (e) {
-    Alert.alert(
-      "Import error",
-      "Some unkown error occured while importing database file"
-    );
-  }
+  } catch (e) {}
 };
 
 export const addImportedData = async ({ filePath, db }) => {
@@ -166,9 +161,7 @@ export const addImportedData = async ({ filePath, db }) => {
 
     Alert.alert("Success", "You data was successfully imported");
     return;
-  } catch (e) {
-    console.log("An error occurred: ", e);
-  }
+  } catch (e) {}
 };
 
 export const shareBooks = async (books, dispatch) => {
