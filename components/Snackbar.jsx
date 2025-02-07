@@ -10,6 +10,7 @@ import {
   readFileInChunks,
   writeChunksToFile,
 } from "../api/database";
+import { clearToBeDeleted } from "../store/slicer";
 
 async function getFileSize(filePath) {
   try {
@@ -28,19 +29,25 @@ const Snackbar = ({ setShown, exports }) => {
   const dispatch = useDispatch();
   const [snackState, setSnackState] = useState();
   const [exportName, setExportName] = useState("");
-  let totalSize = 0;
+  let totalSize = 0,
+    tempSize = 0;
   const [totalFilesSizes, setTotalFileSizes] = useState(totalSize);
+  const [copySize, setCopySize] = useState(tempSize);
   const exportBooks = async () => {
     const permissions =
       await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
     if (!permissions.granted) {
-      console.log("User didn't grant permissions");
       return;
     }
-    const CHUNK_SIZE = 10 * 1024 * 1024;
+    const CHUNK_SIZE = 1 * 1024 * 1024;
     const processFileInChunks = async (sourceUri, destinationUri) => {
       const fileInfo = await FileSystem.getInfoAsync(sourceUri);
       const fileSize = fileInfo.size;
+
+      if ((fileSize > 25, 165, 824)) {
+        Alert.alert("Export Error", "You can not export files more than 24MBs");
+        return;
+      }
 
       let offset = 0;
       const totalChunks = Math.ceil(fileSize / CHUNK_SIZE);
@@ -64,12 +71,12 @@ const Snackbar = ({ setShown, exports }) => {
         const progress = Math.round((offset / fileSize) * 100);
         console.log(`Progress: ${progress}%`);
       }
-
-      console.log("File processing complete.");
+      setShown(false);
+      dispatch(clearToBeDeleted());
     };
 
     // Iterate over the exports and process each file
-    exports.forEach(async (element) => {
+    await exports.forEach(async (element) => {
       const sourceUri = element.bookUrl;
       setExportName(extractFileNameFromUrl(sourceUri));
       const destinationFolder = permissions.directoryUri;
@@ -129,7 +136,7 @@ const Snackbar = ({ setShown, exports }) => {
       <Pie
         size={30}
         style={styles.snackPie}
-        progress={0.5}
+        progress={0.2}
         indeterminate={true}
         color="#FF5722"
       />
