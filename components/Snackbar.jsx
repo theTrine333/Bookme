@@ -44,7 +44,7 @@ const Snackbar = ({ setShown, exports }) => {
       const fileInfo = await FileSystem.getInfoAsync(sourceUri);
       const fileSize = fileInfo.size;
 
-      if ((fileSize > 25, 165, 824)) {
+      if (fileSize > 25_165_824) {
         Alert.alert("Export Error", "You can not export files more than 24MBs");
         return;
       }
