@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
@@ -18,16 +18,43 @@ import { AuthContext } from "@/contexts/authContext";
 import { ThemedView } from "@/components/ThemedView";
 import { Image } from "expo-image";
 import Splash from "@/components/Splash";
-
+import * as Linking from "expo-linking";
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? "light";
   const authState = useContext(AuthContext);
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const { url } = event;
+      const parsed = Linking.parse(url);
+      console.log("Received URL:", url);
+      console.log("Parsed data:", parsed);
+
+      // TODO: Handle navigation or actions based on `parsed`
+    };
+
+    // Listen for incoming links
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    // Handle initial URL if app was opened via link
+    (async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        handleDeepLink({ url: initialUrl });
+      }
+    })();
+
+    return () => {
+      subscription.remove(); // Clean up the event listener
+    };
+  }, []);
+
   if (authState.isLoggedIn == undefined) {
     return <Splash />;
   }
   if (authState.isLoggedIn == false) {
     return <Redirect href={"/auth"} />;
   }
+
   return (
     <Tabs
       screenOptions={{
