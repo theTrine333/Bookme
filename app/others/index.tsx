@@ -8,8 +8,9 @@ import {
   TextInput,
   Share,
   useColorScheme,
+  Alert,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { readerParamsProps } from "@/types";
 import Pdf from "react-native-pdf";
 import { useLocalSearchParams } from "expo-router";
@@ -20,6 +21,7 @@ import { Image } from "expo-image";
 import * as Sharing from "expo-sharing";
 import { Colors } from "@/constants/Colors";
 import * as WebBrowser from "expo-web-browser";
+import { useBooks } from "@/contexts/booksContext";
 const Index = () => {
   const params: readerParamsProps = useLocalSearchParams();
   const source = { uri: `${params.book_url}` };
@@ -38,33 +40,18 @@ const Index = () => {
   const [isFile, setIsFile] = useState(false);
   const theme = useColorScheme() ?? "light";
   const db = useSQLiteContext();
-
+  const context = useBooks();
   if (!params.download_server) {
     return <ActivityIndicator />;
   }
-  const recorgnizeBook = async () => {
-    await db.runAsync(
-      `INSERT INTO Reads(name,page) VALUES ('${params.title}',1);`
-    );
-  };
 
-  const rememberPage = async () => {
-    // setLoading(true);
-    await db
-      .getFirstAsync<any>(
-        `SELECT page from Reads where name='${params.title}';`
-      )
-      .then((e) => {
-        setpageText(Number(e.page));
-        // console.log("Data:", e.page);
-      });
-    // setLoading(false);
+  const rememberPage = () => {
+    let page = context.getPage(params.title);
+    setCurrentPage(`${page}`);
   };
 
   const updatedReadPage = async (page: string) => {
-    await db.runAsync(
-      `UPDATE Reads set page=${page} where name='${params.title}';`
-    );
+    context.savePage(params.title, Number(page));
   };
 
   function checkUrl(url: string) {
@@ -75,6 +62,7 @@ const Index = () => {
     }
     return null;
   }
+
   return (
     <View
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
@@ -228,11 +216,19 @@ const Index = () => {
             page={Number(pageText)}
             source={pdfSource}
             onLoadProgress={(progress) => {}}
+            onLoadComplete={(
+              numberOfPages: number,
+              path: string,
+              size: { height: number; width: number },
+              tableContents
+            ) => {
+              Alert.alert("Load completed");
+            }}
             onPageChanged={(page, numberOfPages) => {
               setCurrentPage(`${page}`);
               setTotalPages(numberOfPages);
 
-              // updatedReadPage({ page });
+              // updatedReadPage(`${page}`);
             }}
             enableDoubleTapZoom={true}
             enablePaging={pageView}

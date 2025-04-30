@@ -20,6 +20,7 @@ import * as FileSystem from "expo-file-system";
 import * as Asset from "expo-asset";
 import * as MediaLibrary from "expo-media-library";
 import { BookDownloadProvider } from "@/contexts/downloadContext";
+import { BookProgressProvider } from "@/contexts/booksContext";
 SplashScreen.preventAutoHideAsync();
 
 const loadDatabase = async () => {
@@ -84,21 +85,23 @@ export default function RootLayout() {
         >
           <AuthProvider>
             <BookDownloadProvider>
-              <ThemeProvider
-                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-              >
-                <ConfigsProvider>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="auth" />
-                    <Stack.Screen name="others" />
-                    <Stack.Screen name="settings" />
-                    <Stack.Screen name="handler" />
-                    <Stack.Screen name="+not-found" />
-                  </Stack>
-                </ConfigsProvider>
-                <StatusBar style="auto" />
-              </ThemeProvider>
+              <BookProgressProvider>
+                <ThemeProvider
+                  value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+                >
+                  <ConfigsProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="auth" />
+                      <Stack.Screen name="others" />
+                      <Stack.Screen name="settings" />
+                      <Stack.Screen name="handler" />
+                      <Stack.Screen name="+not-found" />
+                    </Stack>
+                  </ConfigsProvider>
+                  <StatusBar style="auto" />
+                </ThemeProvider>
+              </BookProgressProvider>
             </BookDownloadProvider>
           </AuthProvider>
         </SQLiteProvider>

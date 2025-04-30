@@ -9,6 +9,11 @@ export const getDownloads = async (db: SQLiteDatabase): Promise<Searches[]> => {
   return results;
 };
 
+export const deleteDownload = async (db: SQLiteDatabase, location: string) => {
+  try {
+    await db.runAsync("DELETE FROM Downloads where FileUri is ?", location);
+  } catch (error) {}
+};
 export const getBookmarks = async (db: SQLiteDatabase): Promise<any[]> => {
   const results = await db.getAllAsync<Downloads[]>("SELECT * FROM Bookmarks");
   return results;
@@ -49,7 +54,6 @@ export const insertDownload = async ({
         status,
       ]
     );
-    console.log("Completed");
   } catch (error) {
     console.log("Error recording file : ", error);
   }
