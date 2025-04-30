@@ -29,6 +29,7 @@
         <data android:scheme="file"/>
         <data android:scheme="content"/>
         <data android:scheme="com.tesla.bookme"/>
+        <data android:mimeType="application/pdf" />
         <data android:scheme="exp+bookme"/>
       </intent-filter>
 
