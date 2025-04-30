@@ -55,21 +55,19 @@ const ResultCard = ({
   return (
     <TouchableOpacity
       onPress={async () => {
-        if (!isInDownload) {
-          setModalData({
-            poster: poster,
-            authors: authors,
-            publisher: publisher,
-            title: title,
-            year: year,
-            lang: lang,
-            book_url: book_url,
-            pages: pages,
-            download_size: download_size,
-            download_server: download_server,
-          });
-          setModalVisibility(true);
-        }
+        setModalData({
+          poster: poster,
+          authors: authors,
+          publisher: publisher,
+          title: title,
+          year: year,
+          lang: lang,
+          book_url: book_url,
+          pages: pages,
+          download_size: download_size,
+          download_server: download_server,
+        });
+        setModalVisibility(true);
       }}
       style={{
         backgroundColor: Colors[theme].blur,

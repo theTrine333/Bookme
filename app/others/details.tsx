@@ -15,12 +15,22 @@ import { Colors } from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { ThemedText } from "@/components/ThemedText";
-import { extractLink } from "@/api/q";
+import { extractLink, sanitizeFileName } from "@/api/q";
 import { detailsParamsProps } from "@/types";
+import { useBookDownload } from "@/contexts/downloadContext";
 
 const Details = () => {
   const parama: detailsParamsProps = useLocalSearchParams();
   const router = useRouter();
+  const downloadContext = useBookDownload();
+  const isDownloading = parama.title === downloadContext.currentBook?.title;
+  const isInDownload =
+    downloadContext.downloadRecords.some(
+      (item) => item.Title === sanitizeFileName(parama.title)
+    ) ||
+    downloadContext.queue.some(
+      (item) => sanitizeFileName(item.title) === sanitizeFileName(parama.title)
+    );
   const theme = useColorScheme() ?? "light";
   const [link, setLink] = useState<any>("");
   const [state, setState] = useState<
@@ -49,10 +59,10 @@ const Details = () => {
         contentFit="cover"
         transition={1000}
       />
-      {/* <LinearGradient
+      <LinearGradient
         colors={["transparent", Colors[theme].background]}
         style={Styles.genreGradient}
-      /> */}
+      />
       <ThemedView
         style={{
           backgroundColor: Colors[theme].blur,
@@ -309,16 +319,29 @@ const Details = () => {
               style={[
                 Styles.downloadBtn,
                 {
-                  opacity: state == "error" || state == "downloading" ? 0.5 : 1,
+                  opacity:
+                    state == "error" ||
+                    isInDownload ||
+                    isDownloading ||
+                    state == "downloading"
+                      ? 0.5
+                      : 1,
                 },
               ]}
               onPress={() => {
                 setState("downloading");
+                const { __EXPO_ROUTER_key, ...newParams } = parama;
+                downloadContext.addToQueue({ ...newParams, publisher: "" });
                 setTimeout(() => {
                   setState("idle");
                 }, 1000);
               }}
-              disabled={state == "error" || state == "downloading"}
+              disabled={
+                state == "error" ||
+                isInDownload ||
+                isDownloading ||
+                state == "downloading"
+              }
             >
               {state == "downloading" ? (
                 <ActivityIndicator color={Colors.dark.text} />
@@ -333,7 +356,13 @@ const Details = () => {
                     },
                   ]}
                 >
-                  Download
+                  {isDownloading
+                    ? `Downloading..${(downloadContext.progress * 100).toFixed(
+                        1
+                      )}%`
+                    : isInDownload
+                    ? "Downloaded"
+                    : "Download"}
                 </ThemedText>
               )}
             </TouchableOpacity>

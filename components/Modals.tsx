@@ -15,7 +15,7 @@ import { ThemedText } from "./ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { Image } from "expo-image";
-import { getBookDetails } from "@/api/q";
+import { getBookDetails, sanitizeFileName } from "@/api/q";
 import { useRouter } from "expo-router";
 import { useBookDownload } from "@/contexts/downloadContext";
 
@@ -25,6 +25,13 @@ const SearchModal = ({ setModalVisibility, modalData }: ModalProps) => {
   const [desc, setDesc] = useState<string | undefined>("");
   const [loadingDesc, setLoadingDesc] = useState<boolean>(true);
   const downloadContext = useBookDownload();
+  const isInDownload =
+    downloadContext.downloadRecords.some(
+      (it) => it.Title === sanitizeFileName(item.title)
+    ) ||
+    downloadContext.queue.some(
+      (it) => sanitizeFileName(it.title) === sanitizeFileName(item.title)
+    );
   const loadDesc = async () => {
     try {
       const result = await getBookDetails(item.book_url);
@@ -311,9 +318,13 @@ const SearchModal = ({ setModalVisibility, modalData }: ModalProps) => {
             <TouchableOpacity
               style={[
                 Styles.modalButton,
-                { backgroundColor: Colors.dark.icon },
+                {
+                  backgroundColor: Colors.dark.icon,
+                  opacity: isInDownload ? 0.5 : 1,
+                },
               ]}
               onPress={() => {
+                if (isInDownload) return;
                 const { setModalVisibility, setModalData, ...newItem } = item;
                 downloadContext.addToQueue(newItem);
                 close();
@@ -326,7 +337,7 @@ const SearchModal = ({ setModalVisibility, modalData }: ModalProps) => {
                   color: Colors.dark.text,
                 }}
               >
-                Free Download
+                {isInDownload ? "Downloaded" : "Free Download"}
               </ThemedText>
             </TouchableOpacity>
           </ThemedView>
