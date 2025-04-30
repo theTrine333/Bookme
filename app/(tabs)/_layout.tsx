@@ -1,4 +1,4 @@
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, useRouter } from "expo-router";
 import React, { useContext, useEffect } from "react";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -13,23 +13,32 @@ import {
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Alert, View } from "react-native";
 import { AuthContext } from "@/contexts/authContext";
 import { ThemedView } from "@/components/ThemedView";
+import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import Splash from "@/components/Splash";
 import * as Linking from "expo-linking";
+import { decordName, sanitizeFileName } from "@/api/q";
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? "light";
   const authState = useContext(AuthContext);
+  const router = useRouter();
   useEffect(() => {
-    const handleDeepLink = (event: { url: string }) => {
+    const handleDeepLink = async (event: { url: string }) => {
       const { url } = event;
       const parsed = Linking.parse(url);
-      console.log("Received URL:", url);
-      console.log("Parsed data:", parsed);
-
-      // TODO: Handle navigation or actions based on `parsed`
+      // console.log("Parsed data:", parsed);
+      const name = decordName(url);
+      const res = await Linking.canOpenURL(url);
+      router.replace({
+        pathname: "/handler",
+        params: {
+          url: url,
+          name: name.toString(),
+        },
+      });
     };
 
     // Listen for incoming links
@@ -38,6 +47,7 @@ export default function TabLayout() {
     // Handle initial URL if app was opened via link
     (async () => {
       const initialUrl = await Linking.getInitialURL();
+
       if (initialUrl) {
         handleDeepLink({ url: initialUrl });
       }

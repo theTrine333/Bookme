@@ -46,6 +46,12 @@ export type detailsParamsProps = {
   year: string;
 };
 
+export interface handlerParamas {
+  __EXPO_ROUTER_key?: string;
+  name?: string;
+  url?: string;
+}
+
 export type readerParamsProps = {
   __EXPO_ROUTER_key?: string;
   authors: string;

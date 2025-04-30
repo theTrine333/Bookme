@@ -18,6 +18,7 @@ import { SQLiteProvider } from "expo-sqlite";
 import Splash from "@/components/Splash";
 import * as FileSystem from "expo-file-system";
 import * as Asset from "expo-asset";
+import * as MediaLibrary from "expo-media-library";
 import { BookDownloadProvider } from "@/contexts/downloadContext";
 SplashScreen.preventAutoHideAsync();
 
@@ -92,6 +93,7 @@ export default function RootLayout() {
                     <Stack.Screen name="auth" />
                     <Stack.Screen name="others" />
                     <Stack.Screen name="settings" />
+                    <Stack.Screen name="handler" />
                     <Stack.Screen name="+not-found" />
                   </Stack>
                 </ConfigsProvider>

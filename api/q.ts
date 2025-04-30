@@ -1,5 +1,6 @@
 import { SearchResult } from "@/types";
 import * as cheerio from "react-native-cheerio";
+import * as FileSystem from "expo-file-system";
 import * as Constants from "expo-constants";
 const mainUrl = Constants.default.expoConfig?.extra?.main_url;
 const search_params =
@@ -149,7 +150,11 @@ export const parseDownloadSize = (sizeString: string): number | undefined => {
 
 // Helpers
 export const sanitizeFileName = (name: string) => {
-  return name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+  const MAX_LENGTH = 100; // Adjust as needed
+  const sanitized = name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+  return sanitized.length > MAX_LENGTH
+    ? sanitized.substring(0, MAX_LENGTH)
+    : sanitized;
 };
 
 export const unsanitizeFileName = (sanitizedName: string) => {
@@ -170,5 +175,40 @@ export function formattedTime(seconds: number): string {
     return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
   } else {
     return `${pad(mins)}:${pad(secs)}`;
+  }
+}
+
+export function decordName(url: string): string {
+  try {
+    const decodedUrl = decodeURIComponent(url);
+    const fileName = decodedUrl.split("/").pop();
+    if (!fileName) return "";
+    // Remove file extension
+    const baseName = fileName.replace(/\.[^/.]+$/, "");
+    return baseName || "";
+  } catch (error) {
+    console.error("Error parsing URL:", error);
+    return "";
+  }
+}
+
+export async function copyContentFileToCache(file: {
+  name: string;
+  url: string;
+}): Promise<string> {
+  try {
+    const fileName = sanitizeFileName(file.name) + ".pdf"; // or extract extension as needed
+    const destPath = FileSystem.cacheDirectory + fileName;
+
+    await FileSystem.copyAsync({
+      from: file.url,
+      to: destPath,
+    });
+
+    console.log("Copied to cache:", destPath);
+    return destPath;
+  } catch (err) {
+    console.error("Failed to copy file:", err);
+    throw err;
   }
 }
